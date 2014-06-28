@@ -1,0 +1,31 @@
+{
+  "name": "sort-keys",
+  "version": "0.0.0",
+  "description": "Sort the keys of an object",
+  "license": "MIT",
+  "repository": "sindresorhus/sort-keys",
+  "author": {
+    "name": "Sindre Sorhus",
+    "email": "sindresorhus@gmail.com",
+    "url": "http://sindresorhus.com"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "object",
+    "obj",
+    "keys",
+    "key",
+    "sort"
+  ],
+  "devDependencies": {
+    "mocha": "*"
+  }
+}
