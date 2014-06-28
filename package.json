@@ -1,6 +1,6 @@
 {
   "name": "sort-keys",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Sort the keys of an object",
   "license": "MIT",
   "repository": "sindresorhus/sort-keys",
