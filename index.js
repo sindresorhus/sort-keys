@@ -5,10 +5,12 @@ module.exports = function (obj, compareFn) {
 	}
 
 	var ret = {};
+	var keys = Object.keys(obj).sort(compareFn);
 
-	Object.keys(obj).sort(compareFn).forEach(function (el) {
-		ret[el] = obj[el];
-	});
+	for (var i = 0; i < keys.length; i++) {
+		var key = keys[i];
+		ret[key] = obj[key];
+	}
 
 	return ret;
 };
