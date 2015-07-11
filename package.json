@@ -7,7 +7,7 @@
   "author": {
     "name": "Sindre Sorhus",
     "email": "sindresorhus@gmail.com",
-    "url": "http://sindresorhus.com"
+    "url": "sindresorhus.com"
   },
   "engines": {
     "node": ">=0.10.0"
@@ -23,8 +23,16 @@
     "obj",
     "keys",
     "key",
-    "sort"
+    "sort",
+    "stable",
+    "deterministic",
+    "deep",
+    "recursive",
+    "recursively"
   ],
+  "dependencies": {
+    "is-obj": "^1.0.0"
+  },
   "devDependencies": {
     "mocha": "*"
   }

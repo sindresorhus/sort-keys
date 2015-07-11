@@ -1,16 +1,33 @@
 'use strict';
-module.exports = function (obj, compareFn) {
-	if (typeof obj !== 'object') {
+var isObj = require('is-obj');
+
+module.exports = function (obj, opts) {
+	if (!isObj(obj)) {
 		throw new TypeError('Expected an object');
 	}
 
-	var ret = {};
-	var keys = Object.keys(obj).sort(compareFn);
+	opts = opts || {};
 
-	for (var i = 0; i < keys.length; i++) {
-		var key = keys[i];
-		ret[key] = obj[key];
+	// DEPRECATED
+	if (typeof opts === 'function') {
+		opts = {compare: opts};
 	}
 
-	return ret;
+	var deep = opts.deep;
+
+	var sortKeys = function (x) {
+		var ret = {};
+		var keys = Object.keys(x).sort(opts.compare);
+
+		for (var i = 0; i < keys.length; i++) {
+			var key = keys[i];
+			var val = x[key];
+
+			ret[key] = deep && val !== x && isObj(val) ? sortKeys(val) : val;
+		}
+
+		return ret;
+	};
+
+	return sortKeys(obj);
 };

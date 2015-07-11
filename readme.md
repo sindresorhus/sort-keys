@@ -2,12 +2,12 @@
 
 > Sort the keys of an object
 
-Useful to get a deterministically ordered object as the order of keys can vary between engines.
+Useful to get a deterministically ordered object, as the order of keys can vary between engines.
 
 
 ## Install
 
-```sh
+```
 $ npm install --save sort-keys
 ```
 
@@ -20,8 +20,13 @@ var sortKeys = require('sort-keys');
 sortKeys({c: 0, a: 0, b: 0});
 //=> {a: 0, b: 0, c: 0}
 
-sortKeys({c: 0, a: 0, b: 0}, function (a, b) {
-	return -a.localeCompare(b);
+sortKeys({b: {b: 0, a: 0}, a: 0}, {deep: true});
+//=> {a: 0, b: {a: 0, b: 0}}
+
+sortKeys({c: 0, a: 0, b: 0}, {
+	compare: function (a, b) {
+		return -a.localeCompare(b);
+	}
 });
 //=> {c: 0, b: 0, a: 0}
 ```
@@ -29,7 +34,7 @@ sortKeys({c: 0, a: 0, b: 0}, function (a, b) {
 
 ## API
 
-### sortKeys(input, [compare])
+### sortKeys(input, [options])
 
 Returns a new object with sorted keys.
 
@@ -38,7 +43,15 @@ Returns a new object with sorted keys.
 *Required*  
 Type: `object`
 
-#### compare
+#### options
+
+##### deep
+
+Type: `boolean`
+
+Recursively sort keys.
+
+##### compare
 
 Type: `function`
 
