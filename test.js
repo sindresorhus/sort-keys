@@ -42,4 +42,9 @@ it('deep option', function () {
 		obj.circular = obj;
 		sortKeys(obj, {deep: true});
 	});
+
+	assert.strictEqual(
+		JSON.stringify(sortKeys({c: {c: 0, a: 0, b: 0}, a: 0, b: 0, z: [9, 8, 7, 6, 5]}, {deep: true})),
+		JSON.stringify({a: 0, b: 0, c: {a: 0, b: 0, c: 0}, z: [9, 8, 7, 6, 5]})
+	);
 });

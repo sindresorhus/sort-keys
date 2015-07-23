@@ -1,9 +1,9 @@
 'use strict';
-var isObj = require('is-obj');
+var isPlainObj = require('is-plain-obj');
 
 module.exports = function (obj, opts) {
-	if (!isObj(obj)) {
-		throw new TypeError('Expected an object');
+	if (!isPlainObj(obj)) {
+		throw new TypeError('Expected a plain object');
 	}
 
 	opts = opts || {};
@@ -23,7 +23,7 @@ module.exports = function (obj, opts) {
 			var key = keys[i];
 			var val = x[key];
 
-			ret[key] = deep && val !== x && isObj(val) ? sortKeys(val) : val;
+			ret[key] = deep && val !== x && isPlainObj(val) ? sortKeys(val) : val;
 		}
 
 		return ret;

@@ -31,7 +31,7 @@
     "recursively"
   ],
   "dependencies": {
-    "is-obj": "^1.0.0"
+    "is-plain-obj": "^1.0.0"
   },
   "devDependencies": {
     "mocha": "*"
