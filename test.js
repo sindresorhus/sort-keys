@@ -43,6 +43,15 @@ it('deep option', function () {
 		sortKeys(obj, {deep: true});
 	});
 
+	var obj = {z: 0};
+	obj.circular = obj;
+	var sortedObj = sortKeys(obj, {deep: true});
+	assert.strictEqual(sortedObj, sortedObj.circular);
+	assert.strictEqual(
+		JSON.stringify(Object.keys(sortedObj)),
+		JSON.stringify(['circular', 'z'])
+	);
+
 	var obj1 = {b: 0};
 	var obj2 = {d: 0};
 	obj1.a = obj2;
