@@ -1,4 +1,5 @@
 'use strict';
+/* eslint-env mocha */
 var assert = require('assert');
 var sortKeys = require('./');
 
@@ -62,12 +63,11 @@ it('deep option', function () {
 		sortKeys(obj2, {deep: true});
 	});
 
-	var sorted1 = sortKeys(obj1, {deep: true});
-	var sorted2 = sortKeys(obj2, {deep: true});
+	var sorted = sortKeys(obj1, {deep: true});
 
-	assert.strictEqual(sorted1, sorted1.a.c);
+	assert.strictEqual(sorted, sorted.a.c);
 	assert.strictEqual(
-		JSON.stringify(Object.keys(sorted1)),
+		JSON.stringify(Object.keys(sorted)),
 		JSON.stringify(['a', 'b'])
 	);
 

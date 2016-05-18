@@ -13,17 +13,17 @@
     "node": ">=0.10.0"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "xo && mocha"
   },
   "files": [
     "index.js"
   ],
   "keywords": [
-    "object",
-    "obj",
-    "keys",
-    "key",
     "sort",
+    "object",
+    "keys",
+    "obj",
+    "key",
     "stable",
     "deterministic",
     "deep",
@@ -34,6 +34,7 @@
     "is-plain-obj": "^1.0.0"
   },
   "devDependencies": {
-    "mocha": "*"
+    "mocha": "*",
+    "xo": "*"
   }
 }
