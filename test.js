@@ -43,6 +43,34 @@ it('deep option', function () {
 		sortKeys(obj, {deep: true});
 	});
 
+	var obj = {z: 0};
+	obj.circular = obj;
+	var sortedObj = sortKeys(obj, {deep: true});
+	assert.strictEqual(sortedObj, sortedObj.circular);
+	assert.strictEqual(
+		JSON.stringify(Object.keys(sortedObj)),
+		JSON.stringify(['circular', 'z'])
+	);
+
+	var obj1 = {b: 0};
+	var obj2 = {d: 0};
+	obj1.a = obj2;
+	obj2.c = obj1;
+
+	assert.doesNotThrow(function () {
+		sortKeys(obj1, {deep: true});
+		sortKeys(obj2, {deep: true});
+	});
+
+	var sorted1 = sortKeys(obj1, {deep: true});
+	var sorted2 = sortKeys(obj2, {deep: true});
+
+	assert.strictEqual(sorted1, sorted1.a.c);
+	assert.strictEqual(
+		JSON.stringify(Object.keys(sorted1)),
+		JSON.stringify(['a', 'b'])
+	);
+
 	assert.strictEqual(
 		JSON.stringify(sortKeys({c: {c: 0, a: 0, b: 0}, a: 0, b: 0, z: [9, 8, 7, 6, 5]}, {deep: true})),
 		JSON.stringify({a: 0, b: 0, c: {a: 0, b: 0, c: 0}, z: [9, 8, 7, 6, 5]})
