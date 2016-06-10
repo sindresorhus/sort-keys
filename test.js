@@ -1,78 +1,50 @@
-'use strict';
-/* eslint-env mocha */
-var assert = require('assert');
-var sortKeys = require('./');
+import test from 'ava';
+import m from './';
 
-it('should sort the keys of an object', function () {
-	assert.strictEqual(
-		JSON.stringify(sortKeys({c: 0, a: 0, b: 0})),
-		JSON.stringify({a: 0, b: 0, c: 0})
-	);
+test('sort the keys of an object', t => {
+	t.deepEqual(m({c: 0, a: 0, b: 0}), {a: 0, b: 0, c: 0});
 });
 
-it('DEPRECATED - should sort the keys of an object with a custom sort function', function () {
-	var sortFn = function (a, b) {
-		return -a.localeCompare(b);
-	};
-
-	assert.strictEqual(
-		JSON.stringify(sortKeys({c: 0, a: 0, b: 0}, sortFn)),
-		JSON.stringify({c: 0, b: 0, a: 0})
-	);
+test('DEPRECATED - sort the keys of an object with a custom sort function', t => {
+	const sortFn = (a, b) => -a.localeCompare(b);
+	t.deepEqual(m({c: 0, a: 0, b: 0}, sortFn), {c: 0, b: 0, a: 0});
 });
 
-it('custom compare function', function () {
-	var compare = function (a, b) {
-		return -a.localeCompare(b);
-	};
-
-	assert.strictEqual(
-		JSON.stringify(sortKeys({c: 0, a: 0, b: 0}, {compare: compare})),
-		JSON.stringify({c: 0, b: 0, a: 0})
-	);
+test('custom compare function', t => {
+	const compare = (a, b) => a.localeCompare(b);
+	t.deepEqual(m({c: 0, a: 0, b: 0}, {compare}), {c: 0, b: 0, a: 0});
 });
 
-it('deep option', function () {
-	assert.strictEqual(
-		JSON.stringify(sortKeys({c: {c: 0, a: 0, b: 0}, a: 0, b: 0}, {deep: true})),
-		JSON.stringify({a: 0, b: 0, c: {a: 0, b: 0, c: 0}})
-	);
+test('deep option', t => {
+	t.deepEqual(m({c: {c: 0, a: 0, b: 0}, a: 0, b: 0}, {deep: true}), {a: 0, b: 0, c: {a: 0, b: 0, c: 0}});
 
-	assert.doesNotThrow(function () {
-		var obj = {a: 0};
+	t.notThrows(() => {
+		const obj = {a: 0};
 		obj.circular = obj;
-		sortKeys(obj, {deep: true});
+		m(obj, {deep: true});
 	});
 
-	var obj = {z: 0};
+	const obj = {z: 0};
 	obj.circular = obj;
-	var sortedObj = sortKeys(obj, {deep: true});
-	assert.strictEqual(sortedObj, sortedObj.circular);
-	assert.strictEqual(
-		JSON.stringify(Object.keys(sortedObj)),
-		JSON.stringify(['circular', 'z'])
-	);
+	const sortedObj = m(obj, {deep: true});
 
-	var obj1 = {b: 0};
-	var obj2 = {d: 0};
+	t.is(sortedObj, sortedObj.circular);
+	t.deepEqual(Object.keys(sortedObj), ['circular', 'z']);
+
+	const obj1 = {b: 0};
+	const obj2 = {d: 0};
+
 	obj1.a = obj2;
 	obj2.c = obj1;
 
-	assert.doesNotThrow(function () {
-		sortKeys(obj1, {deep: true});
-		sortKeys(obj2, {deep: true});
+	t.notThrows(() => {
+		m(obj1, {deep: true});
+		m(obj2, {deep: true});
 	});
 
-	var sorted = sortKeys(obj1, {deep: true});
+	const sorted = m(obj1, {deep: true});
 
-	assert.strictEqual(sorted, sorted.a.c);
-	assert.strictEqual(
-		JSON.stringify(Object.keys(sorted)),
-		JSON.stringify(['a', 'b'])
-	);
-
-	assert.strictEqual(
-		JSON.stringify(sortKeys({c: {c: 0, a: 0, b: 0}, a: 0, b: 0, z: [9, 8, 7, 6, 5]}, {deep: true})),
-		JSON.stringify({a: 0, b: 0, c: {a: 0, b: 0, c: 0}, z: [9, 8, 7, 6, 5]})
-	);
+	t.is(sorted, sorted.a.c);
+	t.deepEqual(Object.keys(sorted), ['a', 'b']);
+	t.deepEqual(m({c: {c: 0, a: 0, b: 0}, a: 0, b: 0, z: [9, 8, 7, 6, 5]}, {deep: true}), {a: 0, b: 0, c: {a: 0, b: 0, c: 0}, z: [9, 8, 7, 6, 5]});
 });
