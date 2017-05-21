@@ -47,4 +47,5 @@ test('deep option', t => {
 	t.is(sorted, sorted.a.c);
 	t.deepEqual(Object.keys(sorted), ['a', 'b']);
 	t.deepEqual(m({c: {c: 0, a: 0, b: 0}, a: 0, b: 0, z: [9, 8, 7, 6, 5]}, {deep: true}), {a: 0, b: 0, c: {a: 0, b: 0, c: 0}, z: [9, 8, 7, 6, 5]});
+	t.deepEqual(Object.keys(m({a: [{b: 0, a: 0}]}, {deep: true}).a[0]), ['a', 'b']);
 });

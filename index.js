@@ -34,6 +34,17 @@ module.exports = function (obj, opts) {
 			var key = keys[i];
 			var val = x[key];
 
+			if (deep && Array.isArray(val)) {
+				var retArr = [];
+
+				for (var j = 0; j < val.length; j++) {
+					retArr[j] = isPlainObj(val[j]) ? sortKeys(val[j]) : val[j];
+				}
+
+				ret[key] = retArr;
+				continue;
+			}
+
 			ret[key] = deep && isPlainObj(val) ? sortKeys(val) : val;
 		}
 
