@@ -1,7 +1,7 @@
 'use strict';
-var isPlainObj = require('is-plain-obj');
+const isPlainObj = require('is-plain-obj');
 
-module.exports = function (obj, opts) {
+module.exports = (obj, opts) => {
 	if (!isPlainObj(obj)) {
 		throw new TypeError('Expected a plain object');
 	}
@@ -10,34 +10,34 @@ module.exports = function (obj, opts) {
 
 	// DEPRECATED
 	if (typeof opts === 'function') {
-		opts = {compare: opts};
+		throw new TypeError('Specify the compare function as an option instead');
 	}
 
-	var deep = opts.deep;
-	var seenInput = [];
-	var seenOutput = [];
+	const deep = opts.deep;
+	const seenInput = [];
+	const seenOutput = [];
 
-	var sortKeys = function (x) {
-		var seenIndex = seenInput.indexOf(x);
+	const sortKeys = x => {
+		const seenIndex = seenInput.indexOf(x);
 
 		if (seenIndex !== -1) {
 			return seenOutput[seenIndex];
 		}
 
-		var ret = {};
-		var keys = Object.keys(x).sort(opts.compare);
+		const ret = {};
+		const keys = Object.keys(x).sort(opts.compare);
 
 		seenInput.push(x);
 		seenOutput.push(ret);
 
-		for (var i = 0; i < keys.length; i++) {
-			var key = keys[i];
-			var val = x[key];
+		for (let i = 0; i < keys.length; i++) {
+			const key = keys[i];
+			const val = x[key];
 
 			if (deep && Array.isArray(val)) {
-				var retArr = [];
+				const retArr = [];
 
-				for (var j = 0; j < val.length; j++) {
+				for (let j = 0; j < val.length; j++) {
 					retArr[j] = isPlainObj(val[j]) ? sortKeys(val[j]) : val[j];
 				}
 

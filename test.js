@@ -1,13 +1,8 @@
 import test from 'ava';
-import m from './';
+import m from '.';
 
 test('sort the keys of an object', t => {
 	t.deepEqual(m({c: 0, a: 0, b: 0}), {a: 0, b: 0, c: 0});
-});
-
-test('DEPRECATED - sort the keys of an object with a custom sort function', t => {
-	const sortFn = (a, b) => -a.localeCompare(b);
-	t.deepEqual(m({c: 0, a: 0, b: 0}, sortFn), {c: 0, b: 0, a: 0});
 });
 
 test('custom compare function', t => {
