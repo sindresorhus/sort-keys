@@ -8,11 +8,6 @@ module.exports = (obj, opts) => {
 
 	opts = opts || {};
 
-	// DEPRECATED
-	if (typeof opts === 'function') {
-		throw new TypeError('Specify the compare function as an option instead');
-	}
-
 	const deep = opts.deep;
 	const seenInput = [];
 	const seenOutput = [];
@@ -30,18 +25,11 @@ module.exports = (obj, opts) => {
 		seenInput.push(x);
 		seenOutput.push(ret);
 
-		for (let i = 0; i < keys.length; i++) {
-			const key = keys[i];
+		for (const key of keys) {
 			const val = x[key];
 
 			if (deep && Array.isArray(val)) {
-				const retArr = [];
-
-				for (let j = 0; j < val.length; j++) {
-					retArr[j] = isPlainObj(val[j]) ? sortKeys(val[j]) : val[j];
-				}
-
-				ret[key] = retArr;
+				ret[key] = val.map(y => isPlainObj(y) ? sortKeys(y) : y);
 				continue;
 			}
 
