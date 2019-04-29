@@ -50,7 +50,7 @@ Recursively sort keys.
 
 ##### compare
 
-Type: `function`
+Type: `Function`
 
 [Compare function.](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
 
