@@ -1,14 +1,12 @@
 'use strict';
 const isPlainObj = require('is-plain-obj');
 
-module.exports = (obj, opts) => {
+module.exports = (obj, opts = {}) => {
 	if (!isPlainObj(obj)) {
 		throw new TypeError('Expected a plain object');
 	}
 
-	opts = opts || {};
-
-	const deep = opts.deep;
+	const {deep} = opts;
 	const seenInput = [];
 	const seenOutput = [];
 

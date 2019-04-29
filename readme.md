@@ -38,7 +38,7 @@ Returns a new object with sorted keys.
 
 #### input
 
-Type: `Object`
+Type: `object`
 
 #### options
 
