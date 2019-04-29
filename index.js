@@ -10,6 +10,32 @@ module.exports = (object, options = {}) => {
 	const seenInput = [];
 	const seenOutput = [];
 
+	const deepSortArray = array => {
+		const seenIndex = seenInput.indexOf(array);
+
+		if (seenIndex !== -1) {
+			return seenOutput[seenIndex];
+		}
+
+		const result = [];
+		seenInput.push(array);
+		seenOutput.push(result);
+
+		result.push(...array.map(item => {
+			if (Array.isArray(item)) {
+				return deepSortArray(item);
+			}
+
+			if (isPlainObject(item)) {
+				return sortKeys(item);
+			}
+
+			return item;
+		}));
+
+		return result;
+	};
+
 	const sortKeys = object => {
 		const seenIndex = seenInput.indexOf(object);
 
@@ -27,7 +53,7 @@ module.exports = (object, options = {}) => {
 			const value = object[key];
 
 			if (deep && Array.isArray(value)) {
-				result[key] = value.map(arrayValue => isPlainObject(arrayValue) ? sortKeys(arrayValue) : arrayValue);
+				result[key] = deepSortArray(value);
 				continue;
 			}
 

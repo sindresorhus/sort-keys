@@ -53,3 +53,26 @@ test('deep option', t => {
 	t.deepEqual(sortKeys({c: {c: 0, a: 0, b: 0}, a: 0, b: 0, z: [9, 8, 7, 6, 5]}, {deep: true}), {a: 0, b: 0, c: {a: 0, b: 0, c: 0}, z: [9, 8, 7, 6, 5]});
 	t.deepEqual(Object.keys(sortKeys({a: [{b: 0, a: 0}]}, {deep: true}).a[0]), ['a', 'b']);
 });
+
+test('deep arrays', t => {
+	const obj = {
+		b: 0,
+		a: [
+			{b: 0, a: 0},
+			[{b: 0, a: 0}]
+		]
+	};
+	obj.a.push(obj);
+	obj.a[1].push(obj.a[1]);
+
+	t.notThrows(() => {
+		sortKeys(obj, {deep: true});
+	});
+
+	const sorted = sortKeys(obj, {deep: true});
+	t.is(sorted.a[2], sorted);
+	t.is(sorted.a[1][1], sorted.a[1]);
+	t.deepEqual(Object.keys(sorted), ['a', 'b']);
+	t.deepEqual(Object.keys(sorted.a[0]), ['a', 'b']);
+	t.deepEqual(Object.keys(sorted.a[1][0]), ['a', 'b']);
+});
