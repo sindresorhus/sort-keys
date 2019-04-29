@@ -38,7 +38,7 @@ Returns a new object with sorted keys.
 
 #### input
 
-Type: `Object`
+Type: `object`
 
 #### options
 
@@ -50,7 +50,7 @@ Recursively sort keys.
 
 ##### compare
 
-Type: `Function`
+Type: `function`
 
 [Compare function.](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
 
