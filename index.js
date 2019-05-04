@@ -1,41 +1,41 @@
 'use strict';
-const isPlainObj = require('is-plain-obj');
+const isPlainObject = require('is-plain-obj');
 
-module.exports = (obj, opts = {}) => {
-	if (!isPlainObj(obj)) {
+module.exports = (object, options = {}) => {
+	if (!isPlainObject(object)) {
 		throw new TypeError('Expected a plain object');
 	}
 
-	const {deep} = opts;
+	const {deep} = options;
 	const seenInput = [];
 	const seenOutput = [];
 
-	const sortKeys = x => {
-		const seenIndex = seenInput.indexOf(x);
+	const sortKeys = object => {
+		const seenIndex = seenInput.indexOf(object);
 
 		if (seenIndex !== -1) {
 			return seenOutput[seenIndex];
 		}
 
-		const ret = {};
-		const keys = Object.keys(x).sort(opts.compare);
+		const result = {};
+		const keys = Object.keys(object).sort(options.compare);
 
-		seenInput.push(x);
-		seenOutput.push(ret);
+		seenInput.push(object);
+		seenOutput.push(result);
 
 		for (const key of keys) {
-			const val = x[key];
+			const value = object[key];
 
-			if (deep && Array.isArray(val)) {
-				ret[key] = val.map(y => isPlainObj(y) ? sortKeys(y) : y);
+			if (deep && Array.isArray(value)) {
+				result[key] = value.map(arrayValue => isPlainObject(arrayValue) ? sortKeys(arrayValue) : arrayValue);
 				continue;
 			}
 
-			ret[key] = deep && isPlainObj(val) ? sortKeys(val) : val;
+			result[key] = deep && isPlainObject(value) ? sortKeys(value) : value;
 		}
 
-		return ret;
+		return result;
 	};
 
-	return sortKeys(obj);
+	return sortKeys(object);
 };
