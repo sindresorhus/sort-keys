@@ -8,7 +8,7 @@ Useful to get a deterministically ordered object, as the order of keys can vary 
 ## Install
 
 ```
-$ npm install --save sort-keys
+$ npm install sort-keys
 ```
 
 
@@ -32,19 +32,22 @@ sortKeys({c: 0, a: 0, b: 0}, {
 
 ## API
 
-### sortKeys(input, [options])
+### sortKeys(object, [options])
 
 Returns a new object with sorted keys.
 
-#### input
+#### object
 
 Type: `object`
 
 #### options
 
+Type: `object`
+
 ##### deep
 
-Type: `boolean`
+Type: `boolean`<br>
+Default: `false`
 
 Recursively sort keys.
 
