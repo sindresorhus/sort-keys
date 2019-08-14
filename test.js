@@ -55,21 +55,21 @@ test('deep option', t => {
 });
 
 test('deep arrays', t => {
-	const obj = {
+	const object = {
 		b: 0,
 		a: [
 			{b: 0, a: 0},
 			[{b: 0, a: 0}]
 		]
 	};
-	obj.a.push(obj);
-	obj.a[1].push(obj.a[1]);
+	object.a.push(object);
+	object.a[1].push(object.a[1]);
 
 	t.notThrows(() => {
-		sortKeys(obj, {deep: true});
+		sortKeys(object, {deep: true});
 	});
 
-	const sorted = sortKeys(obj, {deep: true});
+	const sorted = sortKeys(object, {deep: true});
 	t.is(sorted.a[2], sorted);
 	t.is(sorted.a[1][1], sorted.a[1]);
 	t.deepEqual(Object.keys(sorted), ['a', 'b']);
