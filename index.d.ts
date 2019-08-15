@@ -1,7 +1,7 @@
 declare namespace sortKeys {
 	interface Options {
 		/**
-		Recursively sort keys.
+		Recursively sort keys, including keys of objects inside arrays.
 
 		@default false
 		*/
@@ -29,13 +29,16 @@ sortKeys({c: 0, a: 0, b: 0});
 sortKeys({b: {b: 0, a: 0}, a: 0}, {deep: true});
 //=> {a: 0, b: {a: 0, b: 0}}
 
+sortKeys({b: [{b: 0, a: 0}], a: 0}, {deep: true});
+//=> {a: 0, b: [{a: 0, b: 0}]}
+
 sortKeys({c: 0, a: 0, b: 0}, {
 	compare: (a, b) => -a.localeCompare(b)
 });
 //=> {c: 0, b: 0, a: 0}
 ```
 */
-declare function sortKeys<T extends {[key: string]: unknown}>(
+declare function sortKeys<T extends {[key: string]: any}>(
 	object: T,
 	options?: sortKeys.Options
 ): T;
