@@ -23,6 +23,9 @@ sortKeys({c: 0, a: 0, b: 0});
 sortKeys({b: {b: 0, a: 0}, a: 0}, {deep: true});
 //=> {a: 0, b: {a: 0, b: 0}}
 
+sortKeys({b: [{b: 0, a: 0}], a: 0}, {deep: true});
+//=> {a: 0, b: [{a: 0, b: 0}]}
+
 sortKeys({c: 0, a: 0, b: 0}, {
 	compare: (a, b) => -a.localeCompare(b)
 });
@@ -49,7 +52,7 @@ Type: `object`
 Type: `boolean`<br>
 Default: `false`
 
-Recursively sort keys.
+Recursively sort keys, including keys of objects inside arrays.
 
 ##### compare
 
