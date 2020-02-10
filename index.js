@@ -44,7 +44,7 @@ module.exports = (object, options = {}) => {
 		}
 
 		const result = {};
-		const keys = Object.keys(object).sort(options.compare);
+		const keys = Object.keys(object).sort(options.compare && options.compare.bind(object));
 
 		seenInput.push(object);
 		seenOutput.push(result);
