@@ -24,7 +24,7 @@ const contextCompare = function (a, b, context) {
 		return 1;
 	}
 
-	return lvalue > rvalue;
+	return lvalue > rvalue ? 1 : -1;
 };
 
 test('sort the keys of an object', t => {
