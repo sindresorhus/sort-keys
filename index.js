@@ -38,13 +38,14 @@ module.exports = (object, options = {}) => {
 
 	const sortKeys = object => {
 		const seenIndex = seenInput.indexOf(object);
+		const compareFn = options.compare && ((a, b) => options.compare(a, b, object));
 
 		if (seenIndex !== -1) {
 			return seenOutput[seenIndex];
 		}
 
 		const result = {};
-		const keys = Object.keys(object).sort(options.compare && options.compare.bind(object));
+		const keys = Object.keys(object).sort(compareFn);
 
 		seenInput.push(object);
 		seenOutput.push(result);

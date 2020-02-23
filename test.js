@@ -6,6 +6,27 @@ const orderedDeepEqual = (t, a, b) => {
 	t.deepEqual(Object.keys(a), Object.keys(b));
 };
 
+const contextCompare = function (a, b, context) {
+	const lvalue = context[a];
+	const rvalue = context[b];
+
+	// If values are equal, compare keys
+	if (lvalue === rvalue) {
+		return a.localeCompare(b);
+	}
+
+	// Else: compare values
+	if (typeof rvalue !== 'number') {
+		return -1;
+	}
+
+	if (typeof lvalue !== 'number') {
+		return 1;
+	}
+
+	return lvalue > rvalue;
+};
+
 test('sort the keys of an object', t => {
 	t.deepEqual(sortKeys({c: 0, a: 0, b: 0}), {a: 0, b: 0, c: 0});
 });
@@ -16,17 +37,15 @@ test('custom compare function', t => {
 });
 
 test('custom compare function with context', t => {
-	const compare = function (a, b) {
-		// If values are equal, compare keys
-		if (this[a] === this[b]) {
-			return a.localeCompare(b);
-		}
+	orderedDeepEqual(t, sortKeys({c: 0, a: 0, b: 1}, {compare: contextCompare}), {a: 0, c: 0, b: 1});
+});
 
-		// Else: compare values
-		return this[a] > this[b];
-	};
-
-	orderedDeepEqual(t, sortKeys({c: 0, a: 0, b: 1}, {compare}), {a: 0, c: 0, b: 1});
+test('custom compare function with context - deep', t => {
+	const orig = {c: 0, a: {f: 2, d: 2, e: 1}, b: 1};
+	const expect = {c: 0, b: 1, a: {e: 1, d: 2, f: 2}};
+	const sorted = sortKeys(orig, {compare: contextCompare, deep: true});
+	orderedDeepEqual(t, sorted, expect);
+	orderedDeepEqual(t, sorted.a, expect.a);
 });
 
 test('deep option', t => {

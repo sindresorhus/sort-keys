@@ -1,6 +1,6 @@
 {
 	"name": "sort-keys",
-	"version": "5.0.0",
+	"version": "4.0.0",
 	"description": "Sort the keys of an object",
 	"license": "MIT",
 	"repository": "sindresorhus/sort-keys",
@@ -9,11 +9,7 @@
 		"email": "sindresorhus@gmail.com",
 		"url": "sindresorhus.com"
 	},
-    "contributors": [{
-      "name": "Moos",
-      "email": "mooster@42at.com"
-    }],
-    "engines": {
+	"engines": {
 		"node": ">=8"
 	},
 	"scripts": {
@@ -41,5 +37,5 @@
 		"ava": "^2.2.0",
 		"tsd": "^0.7.4",
 		"xo": "^0.24.0"
-    }
+	}
 }
