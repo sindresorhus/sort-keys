@@ -9,8 +9,11 @@ declare namespace sortKeys {
 
 		/**
 		[Compare function.](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
+		 @param left - left key
+		 @param right - right key
+		 @param object - the current object whose keys are being compared
 		*/
-		readonly compare?: (left: string, right: string, context?: object) => number;
+		readonly compare?: (left: string, right: string, object?: unknown) => number;
 	}
 }
 

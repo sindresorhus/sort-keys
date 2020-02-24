@@ -6,9 +6,9 @@ const orderedDeepEqual = (t, a, b) => {
 	t.deepEqual(Object.keys(a), Object.keys(b));
 };
 
-const contextCompare = function (a, b, context) {
-	const lvalue = context[a];
-	const rvalue = context[b];
+const contextCompare = function (a, b, object) {
+	const lvalue = object[a];
+	const rvalue = object[b];
 
 	// If values are equal, compare keys
 	if (lvalue === rvalue) {

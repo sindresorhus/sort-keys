@@ -58,7 +58,7 @@ Recursively sort keys, including keys of objects inside arrays.
 Type: `Function`
 Default: [Compare function.](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
 
-If given, the function signature `(a, b, context)` gets a third argument which is the current context, so that the values can be used for comparison as well, as `context[a]` and `context[b]`.
+If given, the function signature `(a, b, object)` gets a third argument which is the current object, so that the values can be used for comparison as well, as `object[a]` and `object[b]`.
 
  
 ---
