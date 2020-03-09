@@ -6,25 +6,25 @@ const orderedDeepEqual = (t, a, b) => {
 	t.deepEqual(Object.keys(a), Object.keys(b));
 };
 
-const contextCompare = function (a, b, object) {
-	const lvalue = object[a];
-	const rvalue = object[b];
+const contextCompare = (a, b, object) => {
+	const leftValue = object[a];
+	const rightValue = object[b];
 
 	// If values are equal, compare keys
-	if (lvalue === rvalue) {
+	if (leftValue === rightValue) {
 		return a.localeCompare(b);
 	}
 
-	// Else: compare values
-	if (typeof rvalue !== 'number') {
+	// Else, compare values
+	if (typeof rightValue !== 'number') {
 		return -1;
 	}
 
-	if (typeof lvalue !== 'number') {
+	if (typeof leftValue !== 'number') {
 		return 1;
 	}
 
-	return lvalue > rvalue ? 1 : -1;
+	return leftValue > rightValue ? 1 : -1;
 };
 
 test('sort the keys of an object', t => {
