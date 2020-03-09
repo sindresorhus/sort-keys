@@ -41,9 +41,9 @@ test('custom compare function with context', t => {
 });
 
 test('custom compare function with context - deep', t => {
-	const orig = {c: 0, a: {f: 2, d: 2, e: 1}, b: 1};
+	const fixture = {c: 0, a: {f: 2, d: 2, e: 1}, b: 1};
 	const expect = {c: 0, b: 1, a: {e: 1, d: 2, f: 2}};
-	const sorted = sortKeys(orig, {compare: contextCompare, deep: true});
+	const sorted = sortKeys(fixture, {compare: contextCompare, deep: true});
 	orderedDeepEqual(t, sorted, expect);
 	orderedDeepEqual(t, sorted.a, expect.a);
 });
