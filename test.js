@@ -76,3 +76,18 @@ test('deep arrays', t => {
 	t.deepEqual(Object.keys(sorted.a[0]), ['a', 'b']);
 	t.deepEqual(Object.keys(sorted.a[1][0]), ['a', 'b']);
 });
+
+test('top-level array', t => {
+	const array = [{b: 0, a: 0}, {c: 0, d: 0}];
+	const sorted = sortKeys(array);
+	t.not(sorted, array, 'should make a copy');
+	t.is(sorted[0], array[0]);
+	t.is(sorted[1], array[1]);
+
+	const deepSorted = sortKeys(array, {deep: true});
+	t.not(deepSorted, array);
+	t.not(deepSorted[0], array[0]);
+	t.not(deepSorted[1], array[1]);
+	t.deepEqual(Object.keys(deepSorted[0]), ['a', 'b']);
+	t.deepEqual(Object.keys(deepSorted[1]), ['c', 'd']);
+});

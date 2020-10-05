@@ -43,4 +43,9 @@ declare function sortKeys<T extends {[key: string]: any}>(
 	options?: sortKeys.Options
 ): T;
 
+declare function sortKeys<T>(
+	object: Array<T>,
+	options?: sortKeys.Options
+): Array<T>;
+
 export = sortKeys;
