@@ -44,7 +44,7 @@ Returns a new object with sorted keys.
 
 #### object
 
-Type: `object` | `array`
+Type: `object | Array`
 
 #### options
 
