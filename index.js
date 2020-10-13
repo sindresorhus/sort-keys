@@ -2,8 +2,8 @@
 const isPlainObject = require('is-plain-obj');
 
 module.exports = (object, options = {}) => {
-	if (!isPlainObject(object)) {
-		throw new TypeError('Expected a plain object');
+	if (!isPlainObject(object) && !Array.isArray(object)) {
+		throw new TypeError('Expected a plain object or array');
 	}
 
 	const {deep} = options;
@@ -62,6 +62,10 @@ module.exports = (object, options = {}) => {
 
 		return result;
 	};
+
+	if (Array.isArray(object)) {
+		return deep ? deepSortArray(object) : object.slice();
+	}
 
 	return sortKeys(object);
 };

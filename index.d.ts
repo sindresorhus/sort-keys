@@ -36,11 +36,19 @@ sortKeys({c: 0, a: 0, b: 0}, {
 	compare: (a, b) => -a.localeCompare(b)
 });
 //=> {c: 0, b: 0, a: 0}
+
+sortKeys([{b: 0, a:2}], {deep: true});
+//=> [{a: 2, b: 0}]
 ```
 */
 declare function sortKeys<T extends {[key: string]: any}>(
 	object: T,
 	options?: sortKeys.Options
 ): T;
+
+declare function sortKeys<T>(
+	object: Array<T>,
+	options?: sortKeys.Options
+): Array<T>;
 
 export = sortKeys;
