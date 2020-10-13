@@ -1,16 +1,14 @@
-# sort-keys [![Build Status](https://travis-ci.org/sindresorhus/sort-keys.svg?branch=master)](https://travis-ci.org/sindresorhus/sort-keys)
+# sort-keys [![Build Status](https://travis-ci.com/sindresorhus/sort-keys.svg?branch=master)](https://travis-ci.com/github/sindresorhus/sort-keys)
 
 > Sort the keys of an object
 
 Useful to get a deterministically ordered object, as the order of keys can vary between engines.
-
 
 ## Install
 
 ```
 $ npm install sort-keys
 ```
-
 
 ## Usage
 
@@ -35,7 +33,6 @@ sortKeys([{b: 0, a:2}], {deep: true});
 //=> [{a: 2, b: 0}]
 ```
 
-
 ## API
 
 ### sortKeys(object, options?)
@@ -52,7 +49,7 @@ Type: `object`
 
 ##### deep
 
-Type: `boolean`<br>
+Type: `boolean`\
 Default: `false`
 
 Recursively sort keys, including keys of objects inside arrays.
@@ -62,7 +59,6 @@ Recursively sort keys, including keys of objects inside arrays.
 Type: `Function`
 
 [Compare function.](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
-
 
 ---
 
