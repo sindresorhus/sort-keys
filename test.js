@@ -123,3 +123,28 @@ test('top-level array', t => {
 	t.deepEqual(Object.keys(deepSorted[0]), ['a', 'b']);
 	t.deepEqual(Object.keys(deepSorted[1]), ['c', 'd']);
 });
+
+test('keeps property descriptors intact', t => {
+	const descriptors = {
+		b: {
+			value: 1,
+			configurable: true,
+			enumerable: true,
+			writable: false
+		},
+		a: {
+			value: 2,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		}
+	};
+
+	const object = {};
+	Object.defineProperties(object, descriptors);
+
+	const sorted = sortKeys(object);
+
+	deepEqualInOrder(t, sorted, {a: 2, b: 1});
+	t.deepEqual(Object.getOwnPropertyDescriptors(sorted), descriptors);
+});

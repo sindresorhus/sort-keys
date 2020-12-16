@@ -51,13 +51,18 @@ module.exports = (object, options = {}) => {
 
 		for (const key of keys) {
 			const value = object[key];
+			let newValue;
 
 			if (deep && Array.isArray(value)) {
-				result[key] = deepSortArray(value);
-				continue;
+				newValue = deepSortArray(value);
+			} else {
+				newValue = deep && isPlainObject(value) ? sortKeys(value) : value;
 			}
 
-			result[key] = deep && isPlainObject(value) ? sortKeys(value) : value;
+			Object.defineProperty(result, key, {
+				...Object.getOwnPropertyDescriptor(object, key),
+				value: newValue
+			});
 		}
 
 		return result;
