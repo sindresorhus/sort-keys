@@ -17,15 +17,15 @@ function deepEqualInOrder(t, actual, expected) {
 		seen.add(object2);
 
 		if (Array.isArray(object1)) {
-			for (let i = 0; i < object1.length; i++) {
-				assertSameKeysInOrder(object1[i], object2[i]);
+			for (const index of object1.keys()) {
+				assertSameKeysInOrder(object1[index], object2[index]);
 			}
 		} else if (typeof object1 === 'object') {
 			const keys1 = Object.keys(object1);
 			const keys2 = Object.keys(object2);
 			t.deepEqual(keys1, keys2);
-			for (let i = 0; i < keys1.length; i++) {
-				assertSameKeysInOrder(object1[keys1[i]], object2[keys2[i]]);
+			for (const index of keys1.keys()) {
+				assertSameKeysInOrder(object1[keys1[index]], object2[keys2[index]]);
 			}
 		}
 	}
