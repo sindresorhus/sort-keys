@@ -1,4 +1,4 @@
-# sort-keys [![Build Status](https://travis-ci.com/sindresorhus/sort-keys.svg?branch=master)](https://travis-ci.com/github/sindresorhus/sort-keys)
+# sort-keys
 
 > Sort the keys of an object
 
