@@ -1,5 +1,5 @@
 import test from 'ava';
-import sortKeys from '.';
+import sortKeys from './index.js';
 
 function deepEqualInOrder(t, actual, expected) {
 	t.deepEqual(actual, expected);

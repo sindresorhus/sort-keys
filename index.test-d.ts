@@ -1,7 +1,7 @@
 import {expectType} from 'tsd';
-import sortKeys = require('.');
+import sortKeys, {Options} from './index.js';
 
-const options: sortKeys.Options = {};
+const options: Options = {};
 
 expectType<{a: 0; b: 0; c: 0}>(sortKeys({c: 0, a: 0, b: 0}));
 expectType<{a: 0; b: {a: 0; b: 0}}>(

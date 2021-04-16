@@ -1,18 +1,16 @@
-'use strict';
-const isPlainObject = require('is-plain-obj');
+import isPlainObject from 'is-plain-obj';
 
-module.exports = (object, options = {}) => {
+export default function sortKeys(object, options = {}) {
 	if (!isPlainObject(object) && !Array.isArray(object)) {
 		throw new TypeError('Expected a plain object or array');
 	}
 
-	const {deep} = options;
+	const {deep, compare} = options;
 	const seenInput = [];
 	const seenOutput = [];
 
 	const deepSortArray = array => {
 		const seenIndex = seenInput.indexOf(array);
-
 		if (seenIndex !== -1) {
 			return seenOutput[seenIndex];
 		}
@@ -27,7 +25,7 @@ module.exports = (object, options = {}) => {
 			}
 
 			if (isPlainObject(item)) {
-				return sortKeys(item);
+				return _sortKeys(item);
 			}
 
 			return item;
@@ -36,15 +34,14 @@ module.exports = (object, options = {}) => {
 		return result;
 	};
 
-	const sortKeys = object => {
+	const _sortKeys = object => {
 		const seenIndex = seenInput.indexOf(object);
-
 		if (seenIndex !== -1) {
 			return seenOutput[seenIndex];
 		}
 
 		const result = {};
-		const keys = Object.keys(object).sort(options.compare);
+		const keys = Object.keys(object).sort(compare);
 
 		seenInput.push(object);
 		seenOutput.push(result);
@@ -56,7 +53,7 @@ module.exports = (object, options = {}) => {
 			if (deep && Array.isArray(value)) {
 				newValue = deepSortArray(value);
 			} else {
-				newValue = deep && isPlainObject(value) ? sortKeys(value) : value;
+				newValue = deep && isPlainObject(value) ? _sortKeys(value) : value;
 			}
 
 			Object.defineProperty(result, key, {
@@ -72,5 +69,5 @@ module.exports = (object, options = {}) => {
 		return deep ? deepSortArray(object) : object.slice();
 	}
 
-	return sortKeys(object);
-};
+	return _sortKeys(object);
+}

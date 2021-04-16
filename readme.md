@@ -13,7 +13,7 @@ $ npm install sort-keys
 ## Usage
 
 ```js
-const sortKeys = require('sort-keys');
+import sortKeys from 'sort-keys';
 
 sortKeys({c: 0, a: 0, b: 0});
 //=> {a: 0, b: 0, c: 0}
