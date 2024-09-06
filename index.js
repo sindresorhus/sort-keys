@@ -6,18 +6,16 @@ export default function sortKeys(object, options = {}) {
 	}
 
 	const {deep, compare} = options;
-	const seenInput = [];
-	const seenOutput = [];
+	const cache = new WeakMap();
 
 	const deepSortArray = array => {
-		const seenIndex = seenInput.indexOf(array);
-		if (seenIndex !== -1) {
-			return seenOutput[seenIndex];
+		const resultFromCache = cache.get(array);
+		if (resultFromCache !== undefined) {
+			return resultFromCache;
 		}
 
 		const result = [];
-		seenInput.push(array);
-		seenOutput.push(result);
+		cache.set(array, result);
 
 		result.push(...array.map(item => {
 			if (Array.isArray(item)) {
@@ -35,16 +33,15 @@ export default function sortKeys(object, options = {}) {
 	};
 
 	const _sortKeys = object => {
-		const seenIndex = seenInput.indexOf(object);
-		if (seenIndex !== -1) {
-			return seenOutput[seenIndex];
+		const resultFromCache = cache.get(object);
+		if (resultFromCache !== undefined) {
+			return resultFromCache;
 		}
 
 		const result = {};
 		const keys = Object.keys(object).sort(compare);
 
-		seenInput.push(object);
-		seenOutput.push(result);
+		cache.set(object, result);
 
 		for (const key of keys) {
 			const value = object[key];

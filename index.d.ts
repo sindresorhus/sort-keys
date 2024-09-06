@@ -1,5 +1,3 @@
-/* eslint-disable import/export */
-
 export interface Options {
 	/**
 	Recursively sort keys, including keys of objects inside arrays.
