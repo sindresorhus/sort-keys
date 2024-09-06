@@ -1,4 +1,4 @@
-export interface Options {
+export type Options = {
 	/**
 	Recursively sort keys, including keys of objects inside arrays.
 
@@ -10,7 +10,7 @@ export interface Options {
 	[Compare function.](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
 	*/
 	readonly compare?: (left: string, right: string) => number;
-}
+};
 
 /**
 Sort the keys of an object.

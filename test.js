@@ -82,7 +82,11 @@ test('deep option', t => {
 	deepEqualInOrder(t, deepSorted.a[0], deepSorted.a[0].a.c);
 	t.deepEqual(Object.keys(sorted), ['a', 'b']);
 	t.deepEqual(Object.keys(deepSorted.a[0]), ['a', 'b']);
-	deepEqualInOrder(t, sortKeys({c: {c: 0, a: 0, b: 0}, a: 0, b: 0, z: [9, 8, 7, 6, 5]}, {deep: true}), {a: 0, b: 0, c: {a: 0, b: 0, c: 0}, z: [9, 8, 7, 6, 5]});
+	deepEqualInOrder(t, sortKeys({
+		c: {c: 0, a: 0, b: 0}, a: 0, b: 0, z: [9, 8, 7, 6, 5],
+	}, {deep: true}), {
+		a: 0, b: 0, c: {a: 0, b: 0, c: 0}, z: [9, 8, 7, 6, 5],
+	});
 	t.deepEqual(Object.keys(sortKeys({a: [{b: 0, a: 0}]}, {deep: true}).a[0]), ['a', 'b']);
 });
 
@@ -91,8 +95,8 @@ test('deep arrays', t => {
 		b: 0,
 		a: [
 			{b: 0, a: 0},
-			[{b: 0, a: 0}]
-		]
+			[{b: 0, a: 0}],
+		],
 	};
 	object.a.push(object);
 	object.a[1].push(object.a[1]);
@@ -130,14 +134,14 @@ test('keeps property descriptors intact', t => {
 			value: 1,
 			configurable: true,
 			enumerable: true,
-			writable: false
+			writable: false,
 		},
 		a: {
 			value: 2,
 			configurable: false,
 			enumerable: true,
-			writable: true
-		}
+			writable: true,
+		},
 	};
 
 	const object = {};

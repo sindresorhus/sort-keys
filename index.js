@@ -55,7 +55,7 @@ export default function sortKeys(object, options = {}) {
 
 			Object.defineProperty(result, key, {
 				...Object.getOwnPropertyDescriptor(object, key),
-				value: newValue
+				value: newValue,
 			});
 		}
 
@@ -63,7 +63,7 @@ export default function sortKeys(object, options = {}) {
 	};
 
 	if (Array.isArray(object)) {
-		return deep ? deepSortArray(object) : object.slice();
+		return deep ? deepSortArray(object) : [...object];
 	}
 
 	return _sortKeys(object);

@@ -6,8 +6,8 @@ Useful to get a deterministically ordered object, as the order of keys can vary 
 
 ## Install
 
-```
-$ npm install sort-keys
+```sh
+npm install sort-keys
 ```
 
 ## Usage
@@ -59,15 +59,3 @@ Recursively sort keys, including keys of objects inside arrays.
 Type: `Function`
 
 [Compare function.](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
-
----
-
-<div align="center">
-	<b>
-		<a href="https://tidelift.com/subscription/pkg/npm-sort-keys?utm_source=npm-sort-keys&utm_medium=referral&utm_campaign=readme">Get professional support for this package with a Tidelift subscription</a>
-	</b>
-	<br>
-	<sub>
-		Tidelift helps make open source sustainable for maintainers while giving companies<br>assurances about security, maintenance, and licensing for their dependencies.
-	</sub>
-</div>
