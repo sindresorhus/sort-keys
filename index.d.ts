@@ -4,7 +4,7 @@ export type Options = {
 
 	@default false
 	*/
-	readonly deep?: boolean;
+	readonly deep?: boolean | number;
 
 	/**
 	[Compare function.](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)

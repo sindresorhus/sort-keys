@@ -5,13 +5,26 @@ export default function sortKeys(object, options = {}) {
 		throw new TypeError('Expected a plain object or array');
 	}
 
-	const {deep, compare} = options;
+	let {deep, compare} = options;
+	const deepIsNumber = typeof deep === 'number';
+	if (deepIsNumber && (!Number.isInteger(deep) || deep <= 0)) {
+		throw new TypeError('Expected `deep` to be a positive integer');
+	}
+
 	const cache = new WeakMap();
 
 	const deepSortArray = array => {
 		const resultFromCache = cache.get(array);
 		if (resultFromCache !== undefined) {
 			return resultFromCache;
+		}
+
+		if (deepIsNumber) {
+			if (deep <= 0) {
+				return array;
+			}
+
+			deep--;
 		}
 
 		const result = [];
@@ -36,6 +49,14 @@ export default function sortKeys(object, options = {}) {
 		const resultFromCache = cache.get(object);
 		if (resultFromCache !== undefined) {
 			return resultFromCache;
+		}
+
+		if (deepIsNumber) {
+			if (deep <= 0) {
+				return object;
+			}
+
+			deep--;
 		}
 
 		const result = {};

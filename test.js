@@ -152,3 +152,20 @@ test('keeps property descriptors intact', t => {
 	deepEqualInOrder(t, sorted, {a: 2, b: 1});
 	t.deepEqual(Object.getOwnPropertyDescriptors(sorted), descriptors);
 });
+
+test('with deep number', t => {
+	const object = {
+		b: 0,
+		c: {
+			d: {
+				e: 0,
+				a: 0,
+			},
+			b: 0,
+		},
+	};
+	const sorted = sortKeys(object, {deep: 1});
+	t.deepEqual(Object.keys(sorted), ['b', 'c']);
+	t.deepEqual(Object.keys(sorted.c), ['b', 'd']);
+	t.deepEqual(Object.keys(sorted.c.d), ['e', 'a']);
+});
