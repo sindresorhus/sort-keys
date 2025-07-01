@@ -10,6 +10,11 @@ export type Options = {
 	[Compare function.](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
 	*/
 	readonly compare?: (left: string, right: string) => number;
+
+	/**
+	 * Ignore specific keys when sorting.
+	*/
+	ignoreKeys?: string[];
 };
 
 /**

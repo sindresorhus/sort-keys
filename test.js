@@ -152,3 +152,8 @@ test('keeps property descriptors intact', t => {
 	deepEqualInOrder(t, sorted, {a: 2, b: 1});
 	t.deepEqual(Object.getOwnPropertyDescriptors(sorted), descriptors);
 });
+
+test('ignoreKeys option', t => {
+	const deepSorted = sortKeys({c: {c: 0, a: 0, b: 0}, a: 0, b: 0}, {deep: true, ignoreKeys: ['c']});
+	t.deepEqual(deepSorted, {a: 0, b: 0, c: {c: 0, a: 0, b: 0}});
+});

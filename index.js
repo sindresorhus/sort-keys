@@ -47,6 +47,14 @@ export default function sortKeys(object, options = {}) {
 			const value = object[key];
 			let newValue;
 
+			if (options.ignoreKeys && options.ignoreKeys.includes(key)) {
+				Object.defineProperty(result, key, {
+					...Object.getOwnPropertyDescriptor(object, key),
+					value,
+				});
+				continue;
+			}
+
 			if (deep && Array.isArray(value)) {
 				newValue = deepSortArray(value);
 			} else {
