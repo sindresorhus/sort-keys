@@ -164,7 +164,7 @@ test('with deep number', t => {
 			b: 0,
 		},
 	};
-	const sorted = sortKeys(object, {deep: 1});
+	const sorted = sortKeys(object, {deep: 2});
 	t.deepEqual(Object.keys(sorted), ['b', 'c']);
 	t.deepEqual(Object.keys(sorted.c), ['b', 'd']);
 	t.deepEqual(Object.keys(sorted.c.d), ['e', 'a']);
