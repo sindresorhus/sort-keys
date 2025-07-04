@@ -1,3 +1,10 @@
+export type IgnoreContext = {
+	key: string;
+	value: any;
+	path: string[];
+	depth: number;
+};
+
 export type Options = {
 	/**
 	Recursively sort keys, including keys of objects inside arrays.
@@ -10,6 +17,8 @@ export type Options = {
 	[Compare function.](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
 	*/
 	readonly compare?: (left: string, right: string) => number;
+
+	readonly ignore?: (context: IgnoreContext) => boolean;
 };
 
 /**

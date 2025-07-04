@@ -153,7 +153,7 @@ test('keeps property descriptors intact', t => {
 	t.deepEqual(Object.getOwnPropertyDescriptors(sorted), descriptors);
 });
 
-test('with deep number', t => {
+test('with ignore option', t => {
 	const object = {
 		b: 0,
 		c: {
@@ -164,8 +164,32 @@ test('with deep number', t => {
 			b: 0,
 		},
 	};
-	const sorted = sortKeys(object, {deep: 2});
+	const sorted = sortKeys(object, {ignore: ({depth}) => depth >= 2, deep: true});
 	t.deepEqual(Object.keys(sorted), ['b', 'c']);
 	t.deepEqual(Object.keys(sorted.c), ['b', 'd']);
 	t.deepEqual(Object.keys(sorted.c.d), ['e', 'a']);
+});
+test('with ignore option ignore key', t => {
+	const object = {
+		b: 0,
+		c: {
+			f: {
+				d: 0,
+				a: 0,
+			},
+			e: {
+				h: 0,
+				g: 0,
+			},
+		},
+		a: 0,
+	};
+	const sorted = sortKeys(object, {
+		ignore: ({key}) => key === 'e',
+		deep: true,
+	});
+	t.deepEqual(Object.keys(sorted), ['a', 'b', 'c']);
+	t.deepEqual(Object.keys(sorted.c), ['e', 'f']);
+	t.deepEqual(Object.keys(sorted.c.f), ['a', 'd']);
+	t.deepEqual(Object.keys(sorted.c.e), ['h', 'g']);
 });

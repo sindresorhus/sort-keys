@@ -5,12 +5,8 @@ export default function sortKeys(object, options = {}) {
 		throw new TypeError('Expected a plain object or array');
 	}
 
-	let {deep, compare} = options;
-	const deepIsNumber = typeof deep === 'number';
-	if (deepIsNumber && (!Number.isInteger(deep) || deep <= 0)) {
-		throw new TypeError('Expected `deep` to be a positive integer');
-	}
-
+	const {deep, compare, ignore} = options;
+	const path = [];
 	const cache = new WeakMap();
 
 	const deepSortArray = array => {
@@ -19,18 +15,23 @@ export default function sortKeys(object, options = {}) {
 			return resultFromCache;
 		}
 
-		if (deepIsNumber) {
-			if (deep <= 0) {
-				return array;
-			}
-
-			deep--;
-		}
-
 		const result = [];
 		cache.set(array, result);
 
-		result.push(...array.map(item => {
+		result.push(...array.map((item, index) => {
+			path.push(index);
+
+			if (ignore && ignore(
+				{
+					key: index,
+					value: item,
+					path,
+					depth: path.length,
+				})) {
+				path.pop();
+				return item;
+			}
+
 			if (Array.isArray(item)) {
 				return deepSortArray(item);
 			}
@@ -38,6 +39,8 @@ export default function sortKeys(object, options = {}) {
 			if (isPlainObject(item)) {
 				return _sortKeys(item);
 			}
+
+			path.pop();
 
 			return item;
 		}));
@@ -51,14 +54,6 @@ export default function sortKeys(object, options = {}) {
 			return resultFromCache;
 		}
 
-		if (deepIsNumber) {
-			if (deep <= 0) {
-				return object;
-			}
-
-			deep--;
-		}
-
 		const result = {};
 		const keys = Object.keys(object).sort(compare);
 
@@ -67,6 +62,22 @@ export default function sortKeys(object, options = {}) {
 		for (const key of keys) {
 			const value = object[key];
 			let newValue;
+			path.push(key);
+
+			if (ignore && ignore(
+				{
+					key,
+					value,
+					path,
+					depth: path.length,
+				})) {
+				Object.defineProperty(result, key, {
+					...Object.getOwnPropertyDescriptor(object, key),
+					value,
+				});
+				path.pop();
+				continue;
+			}
 
 			if (deep && Array.isArray(value)) {
 				newValue = deepSortArray(value);
@@ -74,6 +85,7 @@ export default function sortKeys(object, options = {}) {
 				newValue = deep && isPlainObject(value) ? _sortKeys(value) : value;
 			}
 
+			path.pop();
 			Object.defineProperty(result, key, {
 				...Object.getOwnPropertyDescriptor(object, key),
 				value: newValue,
