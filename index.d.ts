@@ -1,12 +1,12 @@
 
 export type IgnoreContext = {
-	/**Key of the current object or array item. */
+	/** Key of the current object or array item. */
 	key: string | number;
-	/**Value of the current object or array item. */
+	/** Value of the current object or array item. */
 	value: unknown;
-	/**Path to the current object or array item. */
+	/** Path to the current object or array item. */
 	path: Array<string | number>;
-	/**Current depth in the object or array. */
+	/** Current depth in the object or array. */
 	depth: number;
 };
 
