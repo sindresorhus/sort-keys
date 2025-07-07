@@ -1,7 +1,8 @@
+
 export type IgnoreContext = {
-	key: string;
-	value: any;
-	path: string[];
+	key: string | number;
+	value: unknown;
+	path: Array<string | number>;
 	depth: number;
 };
 
@@ -18,6 +19,9 @@ export type Options = {
 	*/
 	readonly compare?: (left: string, right: string) => number;
 
+	/**
+	 * Ignore fields that meet certain conditions to avoid sorting.
+	*/
 	readonly ignore?: (context: IgnoreContext) => boolean;
 };
 

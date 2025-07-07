@@ -6,10 +6,9 @@ export default function sortKeys(object, options = {}) {
 	}
 
 	const {deep, compare, ignore} = options;
-	const path = [];
 	const cache = new WeakMap();
 
-	const deepSortArray = array => {
+	const deepSortArray = (array, path = []) => {
 		const resultFromCache = cache.get(array);
 		if (resultFromCache !== undefined) {
 			return resultFromCache;
@@ -21,7 +20,7 @@ export default function sortKeys(object, options = {}) {
 		result.push(...array.map((item, index) => {
 			path.push(index);
 
-			if (ignore && ignore(
+			if (deep && ignore && ignore(
 				{
 					key: index,
 					value: item,
@@ -33,11 +32,11 @@ export default function sortKeys(object, options = {}) {
 			}
 
 			if (Array.isArray(item)) {
-				return deepSortArray(item);
+				return deepSortArray(item, path);
 			}
 
 			if (isPlainObject(item)) {
-				return _sortKeys(item);
+				return _sortKeys(item, path);
 			}
 
 			path.pop();
@@ -48,7 +47,7 @@ export default function sortKeys(object, options = {}) {
 		return result;
 	};
 
-	const _sortKeys = object => {
+	const _sortKeys = (object, path = []) => {
 		const resultFromCache = cache.get(object);
 		if (resultFromCache !== undefined) {
 			return resultFromCache;
@@ -64,7 +63,7 @@ export default function sortKeys(object, options = {}) {
 			let newValue;
 			path.push(key);
 
-			if (ignore && ignore(
+			if (deep && ignore && ignore(
 				{
 					key,
 					value,
@@ -80,9 +79,9 @@ export default function sortKeys(object, options = {}) {
 			}
 
 			if (deep && Array.isArray(value)) {
-				newValue = deepSortArray(value);
+				newValue = deepSortArray(value, path);
 			} else {
-				newValue = deep && isPlainObject(value) ? _sortKeys(value) : value;
+				newValue = deep && isPlainObject(value) ? _sortKeys(value, path) : value;
 			}
 
 			path.pop();

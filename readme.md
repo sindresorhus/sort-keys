@@ -59,3 +59,9 @@ Recursively sort keys, including keys of objects inside arrays.
 Type: `Function`
 
 [Compare function.](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
+
+##### ignore
+
+Type: `Function`
+
+Ignore fields that meet certain conditions to avoid sorting.
