@@ -1,8 +1,12 @@
 
 export type IgnoreContext = {
+	/**Key of the current object or array item. */
 	key: string | number;
+	/**Value of the current object or array item. */
 	value: unknown;
+	/**Path to the current object or array item. */
 	path: Array<string | number>;
+	/**Current depth in the object or array. */
 	depth: number;
 };
 
@@ -20,7 +24,7 @@ export type Options = {
 	readonly compare?: (left: string, right: string) => number;
 
 	/**
-	 * Ignore fields that meet certain conditions to avoid sorting.
+	Ignore fields that meet certain conditions to avoid sorting.
 	*/
 	readonly ignore?: (context: IgnoreContext) => boolean;
 };
