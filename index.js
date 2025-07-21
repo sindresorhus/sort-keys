@@ -54,7 +54,13 @@ export default function sortKeys(object, options = {}) {
 		}
 
 		const result = {};
-		const keys = Object.keys(object).sort(compare);
+		const originKeys = Object.keys(object);
+		const keys = deep && ignore && ignore({
+			key: '',
+			value: object,
+			path,
+			depth: path.length + 1,
+		}) ? originKeys : originKeys.sort(compare);
 
 		cache.set(object, result);
 

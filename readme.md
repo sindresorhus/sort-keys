@@ -60,8 +60,36 @@ Type: `Function`
 
 [Compare function.](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
 
-##### ignore
+##### ignore(context)
 
 Type: `Function`
 
-Ignore fields that meet certain conditions to avoid sorting.
+Decide whether to skip sorting of certain options based on the result returned by ignore function.
+
+###### context
+
+Type: `object`
+
+_key_
+
+Type: `string | number`
+
+Key of the current object or array item.
+
+_value_
+
+Type: `unknown`
+
+Value of the current object or array item.
+
+_path_
+
+Type: `Array<string | number>`
+
+Path to the current object or array item.
+
+_depth_
+
+Type: `number`
+
+Current depth in the object or array.

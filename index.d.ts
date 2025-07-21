@@ -16,7 +16,7 @@ export type Options = {
 
 	@default false
 	*/
-	readonly deep?: boolean | number;
+	readonly deep?: boolean;
 
 	/**
 	[Compare function.](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
@@ -24,7 +24,7 @@ export type Options = {
 	readonly compare?: (left: string, right: string) => number;
 
 	/**
-	Ignore fields that meet certain conditions to avoid sorting.
+	Decide whether to skip sorting of certain options based on the result returned by ignore function.
 	*/
 	readonly ignore?: (context: IgnoreContext) => boolean;
 };
