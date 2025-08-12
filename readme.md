@@ -64,7 +64,7 @@ Type: `Function`
 
 Type: `Function`
 
-Decide whether to skip sorting of certain options based on the result returned by ignore function.
+Decide whether to skip sorting of certain options based on the result returned by ignore function. This only applies when `deep` is set to `true`.
 
 ###### context
 

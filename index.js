@@ -19,29 +19,29 @@ export default function sortKeys(object, options = {}) {
 
 		result.push(...array.map((item, index) => {
 			path.push(index);
+			try {
+				if (deep && ignore && ignore(
+					{
+						key: index,
+						value: item,
+						path: [...path],
+						depth: path.length,
+					})) {
+					return item;
+				}
 
-			if (deep && ignore && ignore(
-				{
-					key: index,
-					value: item,
-					path,
-					depth: path.length,
-				})) {
-				path.pop();
+				if (Array.isArray(item)) {
+					return deepSortArray(item, path);
+				}
+
+				if (isPlainObject(item)) {
+					return _sortKeys(item, path);
+				}
+
 				return item;
+			} finally {
+				path.pop();
 			}
-
-			if (Array.isArray(item)) {
-				return deepSortArray(item, path);
-			}
-
-			if (isPlainObject(item)) {
-				return _sortKeys(item, path);
-			}
-
-			path.pop();
-
-			return item;
 		}));
 
 		return result;
@@ -56,9 +56,9 @@ export default function sortKeys(object, options = {}) {
 		const result = {};
 		const originKeys = Object.keys(object);
 		const keys = deep && ignore && ignore({
-			key: '',
+			key: undefined,
 			value: object,
-			path,
+			path: [...path],
 			depth: path.length + 1,
 		}) ? originKeys : originKeys.sort(compare);
 
@@ -73,13 +73,19 @@ export default function sortKeys(object, options = {}) {
 				{
 					key,
 					value,
-					path,
+					path: [...path],
 					depth: path.length,
 				})) {
-				Object.defineProperty(result, key, {
-					...Object.getOwnPropertyDescriptor(object, key),
-					value,
-				});
+				const descriptor = Object.getOwnPropertyDescriptor(object, key);
+				if (descriptor && ('get' in descriptor || 'set' in descriptor)) {
+					Object.defineProperty(result, key, descriptor);
+				} else {
+					Object.defineProperty(result, key, {
+						...descriptor,
+						value,
+					});
+				}
+
 				path.pop();
 				continue;
 			}

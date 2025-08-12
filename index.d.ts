@@ -1,7 +1,7 @@
 
 export type IgnoreContext = {
 	/** Key of the current object or array item. */
-	key: string | number;
+	key: string | number | undefined;
 	/** Value of the current object or array item. */
 	value: unknown;
 	/** Path to the current object or array item. */
@@ -24,7 +24,7 @@ export type Options = {
 	readonly compare?: (left: string, right: string) => number;
 
 	/**
-	Decide whether to skip sorting of certain options based on the result returned by ignore function.
+	Decide whether to skip sorting of certain options based on the result returned by ignore function. This only applies when `deep` is set to `true`.
 	*/
 	readonly ignore?: (context: IgnoreContext) => boolean;
 };

@@ -314,3 +314,92 @@ test('with ignore option: skip sorting array property', t => {
 	// The "obj" property is deeply sorted
 	t.deepEqual(Object.keys(sorted.obj), ['c', 'd']);
 });
+
+test('ignore: accessor property is preserved (no invalid descriptor)', t => {
+	const input = {};
+	let getCalls = 0;
+	Object.defineProperty(input, 'foo', {
+		get() {
+			getCalls++;
+			return 123;
+		},
+		enumerable: true,
+		configurable: true,
+	});
+	Object.defineProperty(input, 'bar', {
+		value: 1,
+		writable: true,
+		enumerable: true,
+		configurable: true,
+	});
+
+	const output = sortKeys(input, {
+		deep: true,
+		ignore: ({key}) => key === 'foo',
+	});
+
+	const desc = Object.getOwnPropertyDescriptor(output, 'foo');
+	t.truthy(desc);
+	t.is(typeof desc.get, 'function');
+	t.false('value' in desc);
+	t.is(output.foo, 123);
+	t.true(getCalls >= 1);
+});
+
+test('ignore: array sibling path does not leak (only first item ignored)', t => {
+	const input = [
+		{b: 1, a: 2},
+		{b: 1, a: 2},
+	];
+
+	const output = sortKeys(input, {
+		deep: true,
+		ignore: ({key, path}) => typeof key === 'number' && key === 0 && path.length === 1,
+	});
+
+	// First element kept as-is (unsorted)
+	t.deepEqual(Object.keys(output[0]), ['b', 'a']);
+
+	// Second element should still be deeply sorted
+	t.deepEqual(Object.keys(output[1]), ['a', 'b']);
+});
+
+test('ignore: object-level sentinel preserves current object order, but still deep-sorts children', t => {
+	const input = {
+		b: {y: 0, x: 0},
+		a: {y: 0, x: 0},
+	};
+
+	const output = sortKeys(input, {
+		deep: true,
+		ignore: ({key, path}) => key === undefined && path.length === 0,
+	});
+
+	// Top-level order preserved
+	t.deepEqual(Object.keys(output), ['b', 'a']);
+
+	// Children still sorted
+	t.deepEqual(Object.keys(output.b), ['x', 'y']);
+	t.deepEqual(Object.keys(output.a), ['x', 'y']);
+});
+
+test('ignore: depth targeting for object-level sort (skip sorting at depth 3 only)', t => {
+	const input = {
+		a: {
+			b: {d: 1, c: 1},
+			z: 1,
+		},
+	};
+
+	const output = sortKeys(input, {
+		deep: true,
+		ignore: ({key, depth}) => key === undefined && depth === 3,
+	});
+
+	// Depth-3 object kept in original order
+	t.deepEqual(Object.keys(output.a.b), ['d', 'c']);
+
+	// Other levels can still be sorted where applicable
+	t.deepEqual(Object.keys(output), ['a']);
+	t.deepEqual(Object.keys(output.a), ['b', 'z']);
+});
