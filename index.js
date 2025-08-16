@@ -54,13 +54,13 @@ export default function sortKeys(object, options = {}) {
 		}
 
 		const result = {};
-		const originKeys = Object.keys(object);
+		const originalKeys = Object.keys(object);
 		const keys = deep && ignore && ignore({
 			key: undefined,
 			value: object,
 			path: [...path],
 			depth: path.length + 1,
-		}) ? originKeys : originKeys.sort(compare);
+		}) ? originalKeys : originalKeys.sort(compare);
 
 		cache.set(object, result);
 
@@ -97,8 +97,14 @@ export default function sortKeys(object, options = {}) {
 			}
 
 			path.pop();
+			const descriptor = Object.getOwnPropertyDescriptor(object, key);
+			if (descriptor && ('get' in descriptor || 'set' in descriptor)) {
+				Object.defineProperty(result, key, descriptor);
+				continue;
+			}
+
 			Object.defineProperty(result, key, {
-				...Object.getOwnPropertyDescriptor(object, key),
+				...descriptor,
 				value: newValue,
 			});
 		}

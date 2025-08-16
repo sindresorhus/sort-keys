@@ -403,3 +403,20 @@ test('ignore: depth targeting for object-level sort (skip sorting at depth 3 onl
 	t.deepEqual(Object.keys(output), ['a']);
 	t.deepEqual(Object.keys(output.a), ['b', 'z']);
 });
+
+test('accessor property is preserved when not ignored', t => {
+	const input = {};
+	Object.defineProperty(input, 'foo', {
+		get() {
+			return 123;
+		},
+		enumerable: true,
+		configurable: true,
+	});
+	const output = sortKeys(input, {deep: true});
+	const desc = Object.getOwnPropertyDescriptor(output, 'foo');
+	t.truthy(desc);
+	t.is(typeof desc.get, 'function');
+	t.false('value' in desc);
+	t.is(output.foo, 123);
+});
