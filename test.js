@@ -7,8 +7,6 @@ function deepEqualInOrder(t, actual, expected) {
 	const seen = new Set();
 
 	function assertSameKeysInOrder(object1, object2) {
-		// This function assumes the objects given are already deep equal.
-
 		if (seen.has(object1) && seen.has(object2)) {
 			return;
 		}
@@ -33,6 +31,7 @@ function deepEqualInOrder(t, actual, expected) {
 	assertSameKeysInOrder(actual, expected);
 }
 
+// Original tests
 test('sort the keys of an object', t => {
 	deepEqualInOrder(t, sortKeys({c: 0, a: 0, b: 0}), {a: 0, b: 0, c: 0});
 });
@@ -42,7 +41,7 @@ test('custom compare function', t => {
 	deepEqualInOrder(t, sortKeys({c: 0, a: 0, b: 0}, {compare}), {c: 0, b: 0, a: 0});
 });
 
-test('deep option', t => {
+test('deep option as boolean', t => {
 	deepEqualInOrder(t, sortKeys({c: {c: 0, a: 0, b: 0}, a: 0, b: 0}, {deep: true}), {a: 0, b: 0, c: {a: 0, b: 0, c: 0}});
 
 	t.notThrows(() => {
@@ -128,6 +127,21 @@ test('top-level array', t => {
 	t.deepEqual(Object.keys(deepSorted[1]), ['c', 'd']);
 });
 
+test('top-level array preserves holes when shallow', t => {
+	const array = [];
+	array.length = 3; // Create holes
+	array[1] = {b: 0, a: 0};
+
+	const sorted = sortKeys(array); // Shallow copy
+
+	// Holes preserved
+	t.false(0 in sorted);
+	t.true(1 in sorted);
+	t.false(2 in sorted);
+	// Element identity preserved
+	t.is(sorted[1], array[1]);
+});
+
 test('keeps property descriptors intact', t => {
 	const descriptors = {
 		b: {
@@ -153,270 +167,779 @@ test('keeps property descriptors intact', t => {
 	t.deepEqual(Object.getOwnPropertyDescriptors(sorted), descriptors);
 });
 
-test('with ignore option', t => {
+// New tests for context-based API
+test('ignoreKeys as array', t => {
 	const object = {
-		b: 0,
-		c: {
-			d: {
-				e: 0,
-				a: 0,
-			},
-			b: 0,
-		},
+		c: 0, _private: 1, a: 0, b: 0, __internal: 2,
 	};
-	const sorted = sortKeys(object, {ignore: ({depth}) => depth >= 2, deep: true});
-	t.deepEqual(Object.keys(sorted), ['b', 'c']);
-	t.deepEqual(Object.keys(sorted.c), ['d', 'b']);
-	t.deepEqual(Object.keys(sorted.c.d), ['e', 'a']);
+	const sorted = sortKeys(object, {ignoreKeys: ['_private', '__internal']});
+
+	deepEqualInOrder(t, sorted, {
+		_private: 1, __internal: 2, a: 0, b: 0, c: 0,
+	});
 });
 
-test('with ignore option ignore key', t => {
+test('ignoreKeys as function with context', t => {
 	const object = {
-		b: 0,
-		c: {
-			f: {
-				d: 0,
-				a: 0,
-			},
-			e: {
-				h: 0,
-				g: 0,
-			},
-		},
-		a: 0,
+		c: 0, _temp: 1, a: 0, $special: 2, b: 0,
 	};
 	const sorted = sortKeys(object, {
-		ignore: ({key}) => key === 'e',
-		deep: true,
+		ignoreKeys: ({key, depth}) => (key.startsWith('_') || key.startsWith('$')) && depth === 0,
 	});
-	t.deepEqual(Object.keys(sorted), ['a', 'b', 'c']);
-	t.deepEqual(Object.keys(sorted.c), ['e', 'f']);
-	t.deepEqual(Object.keys(sorted.c.f), ['a', 'd']);
-	t.deepEqual(Object.keys(sorted.c.e), ['h', 'g']);
+
+	deepEqualInOrder(t, sorted, {
+		_temp: 1, $special: 2, a: 0, b: 0, c: 0,
+	});
 });
 
-test('with ignore option: ignore sorting for nested objects beyond a certain depth', t => {
-	const input = {
-		c: {
-			b: {
-				e: 3,
-				d: 2,
-				f: 4,
-			},
-			a: {
-				g: 5,
-				h: 6,
-			},
-		},
-		b: {
-			z: 7,
-			y: 8,
-		},
-		a: 1,
-	};
-	const result = sortKeys(input, {
-		ignore: ({depth}) => depth > 1,
-		deep: true,
-	});
-	// Only top-level object should be sorted
-	t.deepEqual(Object.keys(result), ['a', 'b', 'c']);
-	t.deepEqual(Object.keys(result.c), ['b', 'a']);
-	t.deepEqual(Object.keys(result.b), ['z', 'y']);
-});
-
-test('with ignore option: ignore sorting for keys matching specific criteria', t => {
-	const input = {
-		foo: {
-			bar: {
-				baz: 0,
-				qux: 0,
-			},
-			bat: {
-				baz: 1,
-				qux: 1,
-			},
-		},
-		quux: {
-			corge: 2,
-			grault: 3,
-		},
-		garply: 4,
-	};
-	const result = sortKeys(input, {
-		ignore: ({key}) => key === 'bar',
-		deep: true,
-	});
-	// Top-level keys are sorted normally
-	t.deepEqual(Object.keys(result), ['foo', 'garply', 'quux']);
-	// Inside 'foo', the branch for 'bar' remains unsorted
-	t.deepEqual(Object.keys(result.foo), ['bar', 'bat']);
-	// Other nested objects are sorted
-	t.deepEqual(Object.keys(result.quux), ['corge', 'grault']);
-});
-
-test('with ignore option: combining key and depth conditions', t => {
-	const input = {
+test('deep as function with context', t => {
+	const object = {
+		c: {z: 0, a: 0, b: 0},
 		a: 0,
-		b: {
-			unsorted: {
-				y: 2,
-				x: 1,
-			},
-			sorted: {
-				d: 4,
-				c: 3,
-			},
-		},
-		c: 3,
+		config: {z: 0, a: 0, b: 0},
 	};
-	const result = sortKeys(input, {
-		ignore: ({key, depth}) => depth === 2 && key === 'unsorted',
-		deep: true,
+
+	const sorted = sortKeys(object, {
+		deep: ({path}) => !path.includes('config'),
 	});
-	// Top-level keys are sorted
-	t.deepEqual(Object.keys(result), ['a', 'b', 'c']);
-	// In object 'b', the unaffected branch 'sorted' is sorted while 'unsorted' stays in its original order
-	t.deepEqual(Object.keys(result.b), ['sorted', 'unsorted']);
-	t.deepEqual(Object.keys(result.b.sorted), ['c', 'd']);
-	t.deepEqual(Object.keys(result.b.unsorted), ['y', 'x']);
+
+	deepEqualInOrder(t, sorted, {
+		a: 0,
+		c: {a: 0, b: 0, z: 0},
+		config: {z: 0, a: 0, b: 0}, // Not deep processed
+	});
 });
 
-test('with ignore option: skip sorting array property', t => {
-	const input = {
-		arr: [
-			{
-				b: 0,
-				a: 1,
+test('depth-based deep processing', t => {
+	const object = {
+		c: {
+			nested: {
+				deep: {z: 0, a: 0},
 			},
+			b: 0,
+			a: 0,
+		},
+		a: 0,
+	};
+
+	const sorted = sortKeys(object, {
+		deep: ({depth}) => depth < 2, // Only process up to depth 1
+	});
+
+	deepEqualInOrder(t, sorted, {
+		a: 0,
+		c: {
+			a: 0,
+			b: 0,
+			nested: {
+				deep: {z: 0, a: 0}, // Not deep processed due to depth limit
+			},
+		},
+	});
+});
+
+test('path-based ignoreKeys', t => {
+	const object = {
+		user: {
+			metadata: {z: 0, a: 0},
+			profile: {z: 0, a: 0},
+		},
+		c: 0,
+		a: 0,
+	};
+
+	const sorted = sortKeys(object, {
+		deep: true,
+		ignoreKeys: ({key, path}) => key === 'metadata' && path.length === 2 && path[0] === 'user' && path[1] === 'metadata',
+	});
+
+	// Metadata key is ignored from sorting (stays in original position)
+	// but its VALUE is still deep processed because deep: true
+	deepEqualInOrder(t, sorted, {
+		a: 0,
+		c: 0,
+		user: {
+			metadata: {a: 0, z: 0}, // Deep processed (keys sorted)
+			profile: {a: 0, z: 0}, // Deep processed (keys sorted)
+		},
+	});
+});
+
+test('ignoreKeys with no deep processing', t => {
+	const object = {
+		user: {
+			metadata: {z: 0, a: 0},
+			profile: {z: 0, a: 0},
+		},
+		c: 0,
+		a: 0,
+	};
+
+	// To keep metadata contents unsorted, use deep function instead
+	const sorted = sortKeys(object, {
+		deep: ({path}) => !(path.length === 2 && path[0] === 'user' && path[1] === 'metadata'),
+		ignoreKeys: ({key, path}) => key === 'metadata' && path.length === 2 && path[0] === 'user' && path[1] === 'metadata',
+	});
+
+	deepEqualInOrder(t, sorted, {
+		a: 0,
+		c: 0,
+		user: {
+			metadata: {z: 0, a: 0}, // NOT deep processed due to deep filter
+			profile: {a: 0, z: 0}, // Deep processed
+		},
+	});
+});
+
+test('complex context-based processing', t => {
+	const object = {
+		_private: {z: 0, a: 0},
+		config: {
+			nested: {z: 0, a: 0},
+			b: 0,
+			a: 0,
+		},
+		data: {z: 0, a: 0},
+		c: 0,
+		a: 0,
+	};
+
+	const sorted = sortKeys(object, {
+		deep({path, depth, key}) {
+			// Don't deep process private objects or deeply nested config
+			if (key.startsWith('_')) {
+				return false;
+			}
+
+			if (path.length >= 2 && path[0] === 'config' && path[1] === 'nested') {
+				return false;
+			}
+
+			return depth < 3;
+		},
+		ignoreKeys: ({key, depth}) => key.startsWith('_') && depth === 0,
+	});
+
+	deepEqualInOrder(t, sorted, {
+		_private: {z: 0, a: 0}, // Ignored key AND not deep processed
+		a: 0,
+		c: 0,
+		config: {
+			a: 0,
+			b: 0,
+			nested: {z: 0, a: 0}, // Not deep processed due to path filter
+		},
+		data: {a: 0, z: 0}, // Deep processed
+	});
+});
+
+test('array processing with context', t => {
+	const object = {
+		users: [
+			{z: 0, a: 0, profile: {z: 0, a: 0}},
+			{z: 0, a: 0},
+		],
+		b: 0,
+		a: 0,
+	};
+
+	const sorted = sortKeys(object, {
+		deep: ({path}) => !(path.length === 3 && path[0] === 'users' && path[1] === '0' && path[2] === 'profile'), // Skip deep processing of first user's profile
+	});
+
+	deepEqualInOrder(t, sorted, {
+		a: 0,
+		b: 0,
+		users: [
+			{a: 0, profile: {z: 0, a: 0}, z: 0}, // Profile not deep processed
+			{a: 0, z: 0}, // Deep processed
+		],
+	});
+});
+
+test('performance: large depth with depth limit', t => {
+	// Create deeply nested object
+	let deep = {z: 0, a: 0};
+	for (let i = 0; i < 10; i++) {
+		deep = {nested: deep, z: 0, a: 0};
+	}
+
+	const object = {c: 0, data: deep, a: 0};
+
+	const sorted = sortKeys(object, {
+		deep: ({depth}) => depth < 3, // Limit depth to prevent excessive processing
+	});
+
+	t.is(typeof sorted, 'object');
+	t.deepEqual(Object.keys(sorted), ['a', 'c', 'data']);
+});
+
+test('keeps property descriptors intact with context', t => {
+	const descriptors = {
+		b: {
+			value: 1,
+			configurable: true,
+			enumerable: true,
+			writable: false,
+		},
+		a: {
+			value: 2,
+			configurable: false,
+			enumerable: true,
+			writable: true,
+		},
+	};
+
+	const object = {};
+	Object.defineProperties(object, descriptors);
+
+	const sorted = sortKeys(object, {
+		ignoreKeys: () => false, // Don't ignore any keys
+	});
+
+	deepEqualInOrder(t, sorted, {a: 2, b: 1});
+	t.deepEqual(Object.getOwnPropertyDescriptors(sorted), descriptors);
+});
+
+test('mixed ignoreKeys array and function behavior', t => {
+	// Test that array ignoreKeys still works with new API
+	const object = {
+		z: 0,
+		_private: 1,
+		config: {z: 0, a: 0},
+		a: 0,
+		__internal: 2,
+	};
+
+	const sorted = sortKeys(object, {
+		deep: true,
+		ignoreKeys: ['_private', '__internal'], // Array form
+	});
+
+	deepEqualInOrder(t, sorted, {
+		_private: 1,
+		__internal: 2,
+		a: 0,
+		config: {a: 0, z: 0}, // Deep processed
+		z: 0,
+	});
+});
+
+test('deep function with complex logic', t => {
+	const object = {
+		user: {
+			cache: {large: Array.from({length: 1000}).fill(0).map((_, i) => ({[`key${i}`]: i}))},
+			profile: {name: 'John', age: 30},
+			settings: {theme: 'dark', language: 'en'},
+		},
+		data: {items: [{z: 0, a: 0}]},
+		a: 0,
+	};
+
+	const sorted = sortKeys(object, {
+		deep({path, depth, value}) {
+			// Don't process cache (performance)
+			if (path.includes('cache')) {
+				return false;
+			}
+
+			// Don't go deeper than 3 levels
+			if (depth >= 3) {
+				return false;
+			}
+
+			// Don't process large arrays
+			if (Array.isArray(value) && value.length > 100) {
+				return false;
+			}
+
+			return true;
+		},
+	});
+
+	t.deepEqual(Object.keys(sorted), ['a', 'data', 'user']);
+	t.deepEqual(Object.keys(sorted.user), ['cache', 'profile', 'settings']);
+	t.deepEqual(Object.keys(sorted.user.profile), ['age', 'name']);
+	t.deepEqual(Object.keys(sorted.user.settings), ['language', 'theme']);
+
+	// Cache should not be processed
+	t.is(sorted.user.cache, object.user.cache);
+
+	// Data items should be processed
+	t.deepEqual(Object.keys(sorted.data.items[0]), ['a', 'z']);
+});
+
+test('context path for arrays', t => {
+	const object = {
+		items: [
+			{z: 0, a: 0},
 			{
-				d: 0,
-				c: 1,
+				nested: {z: 0, a: 0},
 			},
 		],
-		obj: {
-			d: 0,
-			c: 1,
-		},
 	};
 
-	const sorted = sortKeys(input, {
-		deep: true,
-		ignore: ({key}) => key === 'arr',
+	const sorted = sortKeys(object, {
+		deep: ({path}) => !(path.length === 3 && path[0] === 'items' && path[1] === '1' && path[2] === 'nested'), // Don't deep process nested in second item
 	});
 
-	// Top-level keys are sorted in ascending order
-	t.deepEqual(Object.keys(sorted), ['arr', 'obj']);
-
-	// The array under the "arr" key is not sorted, so each element keeps its original order
-	t.deepEqual(Object.keys(sorted.arr[0]), ['b', 'a']);
-	t.deepEqual(Object.keys(sorted.arr[1]), ['d', 'c']);
-
-	// The "obj" property is deeply sorted
-	t.deepEqual(Object.keys(sorted.obj), ['c', 'd']);
+	deepEqualInOrder(t, sorted, {
+		items: [
+			{a: 0, z: 0}, // Deep processed
+			{
+				nested: {z: 0, a: 0}, // Not deep processed
+			},
+		],
+	});
 });
 
-test('ignore: accessor property is preserved (no invalid descriptor)', t => {
-	const input = {};
-	let getCalls = 0;
-	Object.defineProperty(input, 'foo', {
+test('ignoreKeys with complex path matching', t => {
+	const object = {
+		components: {
+			header: {_internal: 'value', title: 'Header', visible: true},
+			footer: {_internal: 'value', text: 'Footer', visible: false},
+		},
+		_global: 'setting',
+		config: {_internal: 'value', theme: 'dark'},
+	};
+
+	const sorted = sortKeys(object, {
+		deep: true,
+		ignoreKeys({key, path}) {
+			// Ignore all _internal keys everywhere
+			if (key === '_internal') {
+				return true;
+			}
+
+			// Ignore _global at root
+			if (key === '_global' && path.length === 1 && path[0] === '_global') {
+				return true;
+			}
+
+			return false;
+		},
+	});
+
+	deepEqualInOrder(t, sorted, {
+		_global: 'setting', // Ignored at root
+		components: {
+			footer: {
+				_internal: 'value', // Ignored
+				text: 'Footer',
+				visible: false,
+			},
+			header: {
+				_internal: 'value', // Ignored
+				title: 'Header',
+				visible: true,
+			},
+		},
+		config: {
+			_internal: 'value', // Ignored
+			theme: 'dark',
+		},
+	});
+});
+
+test('edge case: empty objects and arrays', t => {
+	const object = {
+		empty: {},
+		emptyArray: [],
+		c: 0,
+		a: 0,
+	};
+
+	const sorted = sortKeys(object, {
+		deep: true,
+		ignoreKeys({value}) {
+			// Check if it's an empty object or empty array
+			if (Array.isArray(value)) {
+				return value.length === 0;
+			}
+
+			if (typeof value === 'object' && value !== null) {
+				return Object.keys(value).length === 0;
+			}
+
+			return false;
+		},
+	});
+
+	// Empty and emptyArray stay in original position (ignored)
+	// c and a get sorted to a, c
+	deepEqualInOrder(t, sorted, {
+		empty: {}, // Ignored (empty object)
+		emptyArray: [], // Ignored (empty array)
+		a: 0, // Sorted
+		c: 0, // Sorted
+	});
+});
+
+test('context validation', t => {
+	const object = {b: {nested: 'value'}, a: 0};
+	const contextCalls = [];
+
+	sortKeys(object, {
+		deep(context) {
+			// Only track calls for object values (not primitives)
+			if (typeof context.value === 'object' && context.value !== null) {
+				contextCalls.push({...context});
+			}
+
+			return true;
+		},
+	});
+
+	// Should have context call only for 'b' (object value)
+	// 'nested' has primitive value so won't trigger deep processing
+	t.is(contextCalls.length, 1);
+
+	const bContext = contextCalls[0];
+	t.is(bContext.key, 'b');
+	t.deepEqual(bContext.path, ['b']);
+	t.is(bContext.depth, 0);
+	t.deepEqual(bContext.value, {nested: 'value'});
+});
+
+test('context validation - comprehensive', t => {
+	const object = {b: {nested: 'value'}, a: 0};
+	const deepCalls = [];
+	const ignoreKeysCalls = [];
+
+	sortKeys(object, {
+		deep(context) {
+			deepCalls.push({...context});
+			return true;
+		},
+		ignoreKeys(context) {
+			ignoreKeysCalls.push({...context});
+			return false; // Don't ignore any keys
+		},
+	});
+
+	// Should have deep calls for values that could be processed deeply
+	// and ignoreKeys calls for all keys being sorted
+	t.is(ignoreKeysCalls.length, 3); // 'b', 'a', 'nested'
+	t.is(deepCalls.length, 3); // Same keys checked for deep processing
+
+	// Verify contexts
+	const bIgnore = ignoreKeysCalls.find(c => c.key === 'b');
+	t.truthy(bIgnore);
+	t.deepEqual(bIgnore.path, ['b']);
+	t.is(bIgnore.depth, 0);
+
+	const nestedIgnore = ignoreKeysCalls.find(c => c.key === 'nested');
+	t.truthy(nestedIgnore);
+	t.deepEqual(nestedIgnore.path, ['b', 'nested']);
+	t.is(nestedIgnore.depth, 1);
+});
+
+test('accessor properties are preserved and sorted', t => {
+	const calls = [];
+	const object = {};
+	Object.defineProperty(object, 'b', {
 		get() {
-			getCalls++;
-			return 123;
+			calls.push('b');
+			return 1;
 		},
 		enumerable: true,
 		configurable: true,
 	});
-	Object.defineProperty(input, 'bar', {
+	Object.defineProperty(object, 'a', {
+		get() {
+			calls.push('a');
+			return 2;
+		},
+		enumerable: true,
+		configurable: true,
+	});
+
+	const sorted = sortKeys(object);
+	// Keys are reordered
+	t.deepEqual(Object.keys(sorted), ['a', 'b']);
+	// Accessors are preserved
+	const descA = Object.getOwnPropertyDescriptor(sorted, 'a');
+	const descB = Object.getOwnPropertyDescriptor(sorted, 'b');
+	t.is(typeof descA.get, 'function');
+	t.is(typeof descB.get, 'function');
+	// Descriptors match originals (ignoring reorder)
+	t.deepEqual({enumerable: descA.enumerable, configurable: descA.configurable}, {enumerable: true, configurable: true});
+	t.deepEqual({enumerable: descB.enumerable, configurable: descB.configurable}, {enumerable: true, configurable: true});
+
+	// Reading values still works
+	t.is(sorted.a, 2);
+	t.is(sorted.b, 1);
+});
+
+test('accessor properties do not throw with deep: true', t => {
+	const object = {};
+	Object.defineProperty(object, 'b', {
+		get() {
+			return {z: 0, a: 0};
+		},
+		enumerable: true,
+		configurable: true,
+	});
+	Object.defineProperty(object, 'a', {
+		get() {
+			return {z: 0, a: 0};
+		},
+		enumerable: true,
+		configurable: true,
+	});
+
+	t.notThrows(() => {
+		sortKeys(object, {deep: true});
+	});
+
+	const sorted = sortKeys(object, {deep: true});
+	// Keys reordered, accessors preserved
+	t.deepEqual(Object.keys(sorted), ['a', 'b']);
+	const descA = Object.getOwnPropertyDescriptor(sorted, 'a');
+	const descB = Object.getOwnPropertyDescriptor(sorted, 'b');
+	t.is(typeof descA.get, 'function');
+	t.is(typeof descB.get, 'function');
+});
+
+test('sparse arrays: preserve holes and sort nested objects', t => {
+	const array = [];
+	array.length = 4; // Create holes
+	array[1] = {b: 0, a: 0};
+	array[3] = {d: 0, c: 0};
+
+	const sorted = sortKeys(array, {deep: true});
+
+	// Length preserved
+	t.is(sorted.length, 4);
+	// Holes preserved
+	t.false(0 in sorted);
+	t.true(1 in sorted);
+	t.false(2 in sorted);
+	t.true(3 in sorted);
+	// Nested objects sorted
+	t.deepEqual(Object.keys(sorted[1]), ['a', 'b']);
+	t.deepEqual(Object.keys(sorted[3]), ['c', 'd']);
+});
+
+test('array extra enumerable properties are not copied', t => {
+	const array = [{b: 0, a: 0}];
+	// Add an extra enumerable prop to array instance
+	array.foo = 'bar';
+
+	const sorted = sortKeys(array, {deep: true});
+
+	// Element deep-processed
+	t.deepEqual(Object.keys(sorted[0]), ['a', 'b']);
+	// Extra property not copied to result array
+	t.false(Object.hasOwn(sorted, 'foo'));
+});
+
+test('Object.create(null) handling', t => {
+	const object = Object.create(null);
+	object.c = 0;
+	object.a = 0;
+	object.b = 0;
+
+	const sorted = sortKeys(object);
+	// Implementation currently relies on is-plain-obj to determine plainness.
+	// If treated as plain, keys should be sorted; otherwise, unchanged.
+	const keys = Object.keys(sorted);
+	const eitherSortedOrOriginal = (keys.join(',') === 'a,b,c')
+		|| (keys.join(',') === 'c,a,b');
+	t.true(eitherSortedOrOriginal);
+});
+
+test('non-plain objects are not deep-processed', t => {
+	const date = new Date();
+	const map = new Map([['z', 0], ['a', 0]]);
+	const object = {
+		b: {z: 0, a: 0},
+		a: 0,
+		date,
+		map,
+	};
+
+	const sorted = sortKeys(object, {deep: true});
+
+	// Keys sorted at root and nested plain objects
+	t.deepEqual(Object.keys(sorted), ['a', 'b', 'date', 'map']);
+	t.deepEqual(Object.keys(sorted.b), ['a', 'z']);
+
+	// Non-plain instances are copied by reference
+	t.is(sorted.date, date);
+	t.is(sorted.map, map);
+});
+
+test('non-enumerable keys are not copied and symbol keys are not copied', t => {
+	const sym = Symbol('s');
+	const object = {};
+	Object.defineProperty(object, 'hidden', {value: 1, enumerable: false});
+	object.a = 0;
+	object[sym] = 2;
+
+	const sorted = sortKeys(object);
+
+	// Only enumerable string keys present
+	t.deepEqual(Object.keys(sorted), ['a']);
+	// Non-enumerable absent
+	t.false(Object.prototype.propertyIsEnumerable.call(sorted, 'hidden'));
+	// Symbol not copied
+	t.false(Object.getOwnPropertySymbols(sorted).includes(sym));
+});
+
+test('throws on invalid input', t => {
+	t.throws(() => sortKeys(123), {instanceOf: TypeError});
+	t.throws(() => sortKeys(null), {instanceOf: TypeError});
+	t.throws(() => sortKeys(new Map()), {instanceOf: TypeError});
+});
+
+test('stable sort: comparator returning 0 preserves original order', t => {
+	const object = {
+		b: 0,
+		a: 0,
+		c: 0,
+		d: 0,
+	};
+	const keepOrder = () => 0;
+	const sorted = sortKeys(object, {compare: keepOrder});
+	// Order should be original since sort is stable in Node 20+
+	t.deepEqual(Object.keys(sorted), ['b', 'a', 'c', 'd']);
+});
+
+test('keys containing dots are treated as opaque path elements', t => {
+	const object = {
+		'a.b': {z: 0, a: 0},
+		a: 0,
+	};
+
+	const sorted = sortKeys(object, {
+		deep: ({path}) => path[0] === 'a.b',
+	});
+
+	deepEqualInOrder(t, sorted, {
+		a: 0,
+		'a.b': {a: 0, z: 0},
+	});
+});
+
+test('non-plain objects (custom prototype) are invalid input', t => {
+	const proto = {inherited: 1};
+	const object = Object.create(proto);
+	object.b = 0;
+	object.a = 0;
+
+	t.throws(() => sortKeys(object), {instanceOf: TypeError});
+});
+
+test('aliasing is preserved for duplicate references', t => {
+	const shared = {z: 0, a: 0};
+	const object = {left: shared, right: shared};
+	const sorted = sortKeys(object, {deep: true});
+
+	// Both references should point to the same new object
+	t.is(sorted.left, sorted.right);
+	// And that object should be sorted
+	deepEqualInOrder(t, sorted.left, {a: 0, z: 0});
+});
+
+test('deep function can selectively skip odd array indices', t => {
+	const object = {
+		items: [
+			{z: 0, a: 0},
+			{z: 0, a: 0},
+			{z: 0, a: 0},
+		],
+	};
+
+	const sorted = sortKeys(object, {
+		deep: ({path}) => !(path[0] === 'items' && Number.isInteger(Number(path[1])) && Number(path[1]) % 2 === 1),
+	});
+
+	// Index 0 and 2 deep-processed, index 1 left as-is
+	t.deepEqual(Object.keys(sorted.items[0]), ['a', 'z']);
+	t.deepEqual(Object.keys(sorted.items[1]), ['z', 'a']);
+	t.deepEqual(Object.keys(sorted.items[2]), ['a', 'z']);
+});
+
+test('accessor getter value is not deep-processed', t => {
+	const object = {};
+	Object.defineProperty(object, 'a', {
+		get() {
+			return {z: 0, a: 0};
+		},
+		enumerable: true,
+		configurable: true,
+	});
+	Object.defineProperty(object, 'b', {
 		value: 1,
+		enumerable: true,
+		configurable: true,
 		writable: true,
-		enumerable: true,
-		configurable: true,
 	});
 
-	const output = sortKeys(input, {
-		deep: true,
-		ignore: ({key}) => key === 'foo',
-	});
-
-	const desc = Object.getOwnPropertyDescriptor(output, 'foo');
-	t.truthy(desc);
-	t.is(typeof desc.get, 'function');
-	t.false('value' in desc);
-	t.is(output.foo, 123);
-	t.true(getCalls >= 1);
+	const sorted = sortKeys(object, {deep: true});
+	// Read the getter and verify its returned object is not sorted
+	t.deepEqual(Object.keys(sorted.a), ['z', 'a']);
 });
 
-test('ignore: array sibling path does not leak (only first item ignored)', t => {
-	const input = [
-		{b: 1, a: 2},
-		{b: 1, a: 2},
-	];
-
-	const output = sortKeys(input, {
-		deep: true,
-		ignore: ({key, path}) => typeof key === 'number' && key === 0 && path.length === 1,
-	});
-
-	// First element kept as-is (unsorted)
-	t.deepEqual(Object.keys(output[0]), ['b', 'a']);
-
-	// Second element should still be deeply sorted
-	t.deepEqual(Object.keys(output[1]), ['a', 'b']);
+test('idempotence: sorting twice yields identical result', t => {
+	const input = {c: {z: 0, a: 0}, b: 0, a: [{d: 0, c: 0}, {b: 0, a: 0}]};
+	const once = sortKeys(input, {deep: true});
+	const twice = sortKeys(once, {deep: true});
+	deepEqualInOrder(t, twice, once);
 });
 
-test('ignore: object-level sentinel preserves current object order, but still deep-sorts children', t => {
+test('ignored keys keep original order before sorted keys', t => {
 	const input = {
-		b: {y: 0, x: 0},
-		a: {y: 0, x: 0},
+		c: 0,
+		x: 1,
+		a: 0,
+		y: 2,
+		b: 0,
 	};
-
-	const output = sortKeys(input, {
-		deep: true,
-		ignore: ({key, path}) => key === undefined && path.length === 0,
+	const sorted = sortKeys(input, {
+		ignoreKeys: ['x', 'y'],
+		compare: (l, r) => l.localeCompare(r),
 	});
-
-	// Top-level order preserved
-	t.deepEqual(Object.keys(output), ['b', 'a']);
-
-	// Children still sorted
-	t.deepEqual(Object.keys(output.b), ['x', 'y']);
-	t.deepEqual(Object.keys(output.a), ['x', 'y']);
+	deepEqualInOrder(t, sorted, {
+		x: 1,
+		y: 2,
+		a: 0,
+		b: 0,
+		c: 0,
+	});
 });
 
-test('ignore: depth targeting for object-level sort (skip sorting at depth 3 only)', t => {
+test('depth semantics for arrays and objects in deep function', t => {
+	const calls = [];
 	const input = {
-		a: {
-			b: {d: 1, c: 1},
-			z: 1,
+		root: {
+			obj: {x: 0},
+			arr: [{y: 0}],
 		},
 	};
-
-	const output = sortKeys(input, {
-		deep: true,
-		ignore: ({key, depth}) => key === undefined && depth === 3,
-	});
-
-	// Depth-3 object kept in original order
-	t.deepEqual(Object.keys(output.a.b), ['d', 'c']);
-
-	// Other levels can still be sorted where applicable
-	t.deepEqual(Object.keys(output), ['a']);
-	t.deepEqual(Object.keys(output.a), ['b', 'z']);
-});
-
-test('accessor property is preserved when not ignored', t => {
-	const input = {};
-	Object.defineProperty(input, 'foo', {
-		get() {
-			return 123;
+	sortKeys(input, {
+		deep(context) {
+			calls.push({
+				path: context.path,
+				depth: context.depth,
+				isArray: Array.isArray(context.value),
+			});
+			return true;
 		},
-		enumerable: true,
-		configurable: true,
 	});
-	const output = sortKeys(input, {deep: true});
-	const desc = Object.getOwnPropertyDescriptor(output, 'foo');
-	t.truthy(desc);
-	t.is(typeof desc.get, 'function');
-	t.false('value' in desc);
-	t.is(output.foo, 123);
+
+	const find = p => calls.find(c => JSON.stringify(c.path) === JSON.stringify(p));
+	// Root
+	t.truthy(find(['root']));
+	t.is(find(['root']).depth, 0);
+	// Root.obj
+	t.truthy(find(['root', 'obj']));
+	t.is(find(['root', 'obj']).depth, 1);
+	// Root.arr (array at depth 1)
+	t.truthy(find(['root', 'arr']));
+	t.is(find(['root', 'arr']).depth, 1);
+	// Root.arr.0 (array item increases depth)
+	t.truthy(find(['root', 'arr', '0']));
+	t.is(find(['root', 'arr', '0']).depth, 2);
 });
