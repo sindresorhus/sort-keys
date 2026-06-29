@@ -942,4 +942,7 @@ test('depth semantics for arrays and objects in deep function', t => {
 	// Root.arr.0 (array item increases depth)
 	t.truthy(find(['root', 'arr', '0']));
 	t.is(find(['root', 'arr', '0']).depth, 2);
+	// Root.arr.0.y (a key inside an array element is one deeper than the element)
+	t.truthy(find(['root', 'arr', '0', 'y']));
+	t.is(find(['root', 'arr', '0', 'y']).depth, 3);
 });

@@ -62,23 +62,24 @@ export default function sortKeys(object, options = {}) {
 			const item = array[index];
 			const indexKey = String(index);
 			const itemPath = buildPath(currentPath, indexKey);
+			const contextDepth = currentDepth + 1;
 			const context = {
 				key: indexKey,
 				value: item,
 				path: itemPath,
-				depth: currentDepth + 1,
+				depth: contextDepth,
 			};
 
 			if (Array.isArray(item)) {
 				result[index] = shouldProcessDeep(context)
-					? deepSortArray(item, itemPath, currentDepth + 1)
+					? deepSortArray(item, itemPath, contextDepth)
 					: item;
 				continue;
 			}
 
 			if (isPlainObject(item)) {
 				result[index] = shouldProcessDeep(context)
-					? _sortKeys(item, itemPath, currentDepth + 1)
+					? _sortKeys(item, itemPath, contextDepth + 1)
 					: item;
 				continue;
 			}
